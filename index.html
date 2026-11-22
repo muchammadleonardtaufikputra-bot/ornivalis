@@ -104,10 +104,21 @@
         pointer-events: none;
       }
       .griffin-fly img { width: 100%; display: block; }
+      .griffin-bob { position: relative; width: 100%; aspect-ratio: 405 / 220; }
+      .griffin-wing {
+        position: absolute; left: 0; top: 0;
+        transform-origin: 34.6% 52.3%;
+      }
       .griffin-fly.flying { animation: griffinFly 4.2s ease-in-out forwards; }
-      .griffin-fly.flying img {
+      .griffin-fly.flying .griffin-bob {
         animation: griffinBob 0.45s ease-in-out infinite alternate;
         filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.45));
+      }
+      .griffin-fly.flying .griffin-wing { animation: griffinFlap 0.6s ease-in-out infinite; }
+      @keyframes griffinFlap {
+        0% { transform: rotate(-16deg); }
+        45% { transform: rotate(9deg); }
+        100% { transform: rotate(-16deg); }
       }
       @keyframes griffinFly {
         0% { transform: translate(0, 0) scale(1) rotate(0deg); }
@@ -779,7 +790,7 @@
       <div class="hero-logo-wrap" role="button" tabindex="0" aria-label="Putar animasi griffin terbang">
         <img class="hero-logo" src="images/logo.png" alt="Logo ORNIVALIS — griffin berdiri di atas gunung berapi" />
         <div class="griffin-patch" hidden></div>
-        <div class="griffin-fly" hidden><img src="images/griffin-fly.png" alt="" aria-hidden="true" /></div>
+        <div class="griffin-fly" hidden><div class="griffin-bob"><img class="griffin-body" src="images/griffin-body.png" alt="" aria-hidden="true" /><img class="griffin-wing" src="images/griffin-wing.png" alt="" aria-hidden="true" /></div></div>
       </div>
       <h1>ORNIVALIS</h1>
       <p class="tagline">&ldquo;Kita mungkin akan pergi ke arah yang berbeda, tapi kita akan selalu pulang ke cerita yang sama.&rdquo;</p>
