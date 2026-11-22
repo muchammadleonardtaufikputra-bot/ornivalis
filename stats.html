@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Statistik Pengunjung — ORNIVALIS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f6f2ea; --surface: #fffdf8; --ink: #1c2434; --ink-soft: #4c5568;
+        --line: #ddd2bd; --navy: #0e1c30; --gold: #c9973f; --gold-strong: #a97a24;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; background: var(--bg); color: var(--ink);
+        font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+        padding: 28px 18px 60px;
+      }
+      .wrap { max-width: 860px; margin: 0 auto; }
+      h1 { font-family: "Playfair Display", Georgia, serif; font-size: clamp(1.7rem, 6vw, 2.4rem); margin: 0 0 6px; color: var(--navy); }
+      .sub { color: var(--ink-soft); margin: 0 0 24px; }
+      .back { display: inline-block; margin-bottom: 22px; color: var(--gold-strong); font-weight: 700; text-decoration: none; }
+      .card {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+        padding: 20px 22px; margin-bottom: 18px; box-shadow: 0 10px 26px rgba(28, 36, 52, 0.08);
+      }
+      .card h2 { font-size: 1.05rem; margin: 0 0 12px; color: var(--navy); }
+      .gate { display: flex; gap: 10px; flex-wrap: wrap; }
+      input[type="password"], input[type="text"] {
+        flex: 1; min-width: 200px; border: 1px solid var(--line); border-radius: 10px;
+        padding: 11px 13px; font: inherit; background: #fffdf8; color: var(--ink);
+      }
+      input:focus { outline: 2px solid var(--gold); outline-offset: 1px; }
+      button {
+        background: var(--gold); color: #201503; border: 0; border-radius: 999px;
+        padding: 11px 22px; font: inherit; font-weight: 800; cursor: pointer;
+      }
+      button:hover { background: #e0b155; }
+      button.danger { background: #f3d9d7; color: #8f1d16; padding: 6px 14px; font-size: 0.85rem; }
+      button.danger:hover { background: #eec5c1; }
+      .err { color: #b3261e; font-weight: 600; margin: 10px 0 0; }
+      .big { display: flex; gap: 14px; flex-wrap: wrap; }
+      .stat { flex: 1; min-width: 140px; background: var(--navy); color: #f3ecd9; border-radius: 14px; padding: 16px 18px; }
+      .stat b { display: block; font-size: 1.9rem; color: #e7bd62; }
+      .stat span { font-size: 0.88rem; }
+      table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+      th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+      th { color: var(--ink-soft); font-size: 0.82rem; letter-spacing: 0.06em; }
+      .visit, .msg-row { padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 0.92rem; }
+      .visit:last-child, .msg-row:last-child { border-bottom: 0; }
+      .visit small, .msg-row small { color: var(--ink-soft); }
+      .msg-row { display: flex; gap: 12px; align-items: flex-start; justify-content: space-between; }
+      .msg-row .body { flex: 1; }
+      .msg-row .body b { color: var(--navy); }
+      .msg-row .body p { margin: 4px 0 0; white-space: pre-wrap; overflow-wrap: break-word; }
+      .muted { color: var(--ink-soft); }
+      [hidden] { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <a class="back" href="./">← Kembali ke halaman ORNIVALIS</a>
+      <h1>Statistik Pengunjung</h1>
+      <p class="sub">Halaman ini hanya untuk yang tahu password-nya. Kunjungan dihitung anonim — tanpa nama dan tanpa alamat IP.</p>
+
+      <div class="card" id="gateCard">
+        <h2>Masukkan password statistik</h2>
+        <div class="gate">
+          <input type="password" id="keyInput" placeholder="Password statistik" autocomplete="off" />
+          <button id="keyBtn" type="button">Lihat Statistik</button>
+        </div>
+        <p class="err" id="gateErr" hidden>Password salah. Coba lagi.</p>
+      </div>
+
+      <div id="stats" hidden>
+        <div class="big" style="margin-bottom: 18px;">
+          <div class="stat"><b id="stTotal">0</b><span>Total kunjungan</span></div>
+          <div class="stat"><b id="stToday">0</b><span>Kunjungan hari ini</span></div>
+          <div class="stat"><b id="stUniques">0</b><span>Pengunjung unik hari ini</span></div>
+          <div class="stat"><b id="stMsg">0</b><span>Pesan di buku tamu</span></div>
+        </div>
+
+        <div class="card">
+          <h2>7 hari terakhir</h2>
+          <table>
+            <thead><tr><th>Tanggal</th><th>Kunjungan</th><th>Unik</th></tr></thead>
+            <tbody id="daysBody"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <h2>Pesan buku tamu</h2>
+          <div id="msgList"><p class="muted">Belum ada pesan.</p></div>
+        </div>
+
+        <div class="card">
+          <h2>Kunjungan terakhir</h2>
+          <div id="visitList"><p class="muted">Belum ada kunjungan tercatat.</p></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var API = "https://ornivalis-stats.muchammadleonardtaufikputra.workers.dev";
+        var key = "";
+        var keyInput = document.getElementById("keyInput");
+        var gateErr = document.getElementById("gateErr");
+
+        function fmtTime(t) {
+          try {
+            return new Date(t).toLocaleString("id-ID", {
+              timeZone: "Asia/Jakarta",
+              day: "numeric", month: "short",
+              hour: "2-digit", minute: "2-digit"
+            });
+          } catch (e) { return ""; }
+        }
+
+        function loadStats() {
+          fetch(API + "/stats?key=" + encodeURIComponent(key))
+            .then(function (r) {
+              if (!r.ok) throw new Error("unauthorized");
+              return r.json();
+            })
+            .then(function (d) {
+              gateErr.hidden = true;
+              document.getElementById("stats").hidden = false;
+              document.getElementById("stTotal").textContent = d.total || 0;
+              var today = (d.days && d.days[0]) || { views: 0, uniques: 0 };
+              document.getElementById("stToday").textContent = today.views;
+              document.getElementById("stUniques").textContent = today.uniques;
+              document.getElementById("stMsg").textContent = d.messagesTotal || 0;
+
+              var daysBody = document.getElementById("daysBody");
+              daysBody.innerHTML = "";
+              (d.days || []).forEach(function (day) {
+                var tr = document.createElement("tr");
+                [day.date, day.views, day.uniques].forEach(function (v) {
+                  var td = document.createElement("td");
+                  td.textContent = v;
+                  tr.appendChild(td);
+                });
+                daysBody.appendChild(tr);
+              });
+
+              var msgList = document.getElementById("msgList");
+              msgList.innerHTML = "";
+              var msgs = d.messages || [];
+              if (!msgs.length) msgList.innerHTML = '<p class="muted">Belum ada pesan.</p>';
+              msgs.forEach(function (m) {
+                var row = document.createElement("div");
+                row.className = "msg-row";
+                var body = document.createElement("div");
+                body.className = "body";
+                var head = document.createElement("b");
+                head.textContent = m.name;
+                var time = document.createElement("small");
+                time.textContent = " — " + fmtTime(m.t);
+                var text = document.createElement("p");
+                text.textContent = m.message;
+                body.appendChild(head);
+                body.appendChild(time);
+                body.appendChild(text);
+                var del = document.createElement("button");
+                del.className = "danger";
+                del.type = "button";
+                del.textContent = "Hapus";
+                del.addEventListener("click", function () {
+                  if (!confirm("Hapus pesan dari " + m.name + "?")) return;
+                  del.disabled = true;
+                  fetch(API + "/messages?id=" + encodeURIComponent(m.id) + "&key=" + encodeURIComponent(key), { method: "DELETE" })
+                    .then(function (r) { if (!r.ok) throw new Error("gagal"); row.remove(); loadStatsCount(); })
+                    .catch(function () { del.disabled = false; alert("Gagal menghapus pesan."); });
+                });
+                row.appendChild(body);
+                row.appendChild(del);
+                msgList.appendChild(row);
+              });
+
+              var visitList = document.getElementById("visitList");
+              visitList.innerHTML = "";
+              var recent = d.recent || [];
+              if (!recent.length) visitList.innerHTML = '<p class="muted">Belum ada kunjungan tercatat.</p>';
+              recent.forEach(function (v) {
+                var div = document.createElement("div");
+                div.className = "visit";
+                var t = document.createElement("b");
+                t.textContent = fmtTime(v.t);
+                var s = document.createElement("small");
+                s.textContent = " — " + (v.city || "-") + ", " + (v.country || "-") + " · " + v.device + " · " + v.browser + " · " + v.source;
+                div.appendChild(t);
+                div.appendChild(s);
+                visitList.appendChild(div);
+              });
+            })
+            .catch(function () {
+              gateErr.hidden = false;
+              document.getElementById("stats").hidden = true;
+            });
+        }
+
+        function loadStatsCount() {
+          fetch(API + "/stats?key=" + encodeURIComponent(key))
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+              document.getElementById("stMsg").textContent = d.messagesTotal || 0;
+            })
+            .catch(function () {});
+        }
+
+        document.getElementById("keyBtn").addEventListener("click", function () {
+          key = keyInput.value.trim();
+          if (!key) { gateErr.hidden = false; return; }
+          loadStats();
+        });
+        keyInput.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") document.getElementById("keyBtn").click();
+        });
+      })();
+    </script>
+  </body>
+</html>

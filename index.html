@@ -403,6 +403,91 @@
       footer .foot-rule { width: 64px; height: 3px; background: var(--gold); border-radius: 3px; margin: 0 auto 18px; }
       footer b { color: var(--ink); letter-spacing: 0.14em; }
 
+      /* ---------- DEBU EMAS + PESAN + PENGUNJUNG ---------- */
+      .hero { position: relative; }
+      #goldDust {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      .sparkle {
+        position: fixed;
+        width: 9px;
+        height: 9px;
+        background: var(--gold);
+        border-radius: 2px;
+        transform: rotate(45deg);
+        pointer-events: none;
+        z-index: 70;
+      }
+      .visit-line { margin-top: 22px; font-size: 0.9rem; }
+      .visit-line a { color: var(--gold-strong); font-weight: 700; }
+      .visit-line b { color: var(--ink); }
+      .form-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        padding: 26px 24px;
+        max-width: 640px;
+        margin: 0 auto 34px;
+        text-align: left;
+      }
+      .form-card label { display: block; font-weight: 700; margin: 0 0 6px; }
+      .form-card input,
+      .form-card textarea {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 11px 13px;
+        font: inherit;
+        font-size: 0.98rem;
+        background: #fffdf8;
+        color: var(--ink);
+        margin-bottom: 14px;
+      }
+      .form-card input:focus,
+      .form-card textarea:focus { outline: 2px solid var(--gold); outline-offset: 1px; border-color: var(--gold); }
+      .form-card textarea { resize: vertical; min-height: 96px; }
+      .char-count { text-align: right; font-size: 0.82rem; color: var(--ink-soft); margin: -8px 0 14px; }
+      .msg-btn {
+        background: var(--gold);
+        color: #201503;
+        border: 0;
+        border-radius: 999px;
+        padding: 12px 26px;
+        font: inherit;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .msg-btn:hover { background: #e0b155; }
+      .msg-btn:disabled { opacity: 0.6; cursor: wait; }
+      .form-note { margin: 12px 0 0; font-size: 0.92rem; min-height: 1.2em; }
+      .form-note.err { color: #b3261e; font-weight: 600; }
+      .form-note.ok { color: #1e7d46; font-weight: 600; }
+      .wall { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 860px; margin: 0 auto; }
+      @media (max-width: 650px) { .wall { grid-template-columns: 1fr; } }
+      .msg-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 18px 20px;
+        text-align: left;
+        box-shadow: 0 8px 22px rgba(28, 36, 52, 0.08);
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+      }
+      .msg-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+      .msg-card .msg-name { font-weight: 800; color: var(--navy); }
+      .msg-card .msg-time { display: block; font-size: 0.8rem; color: var(--ink-soft); margin: 2px 0 8px; }
+      .msg-card p { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; }
+      .msg-empty { grid-column: 1 / -1; text-align: center; color: var(--ink-soft); padding: 22px 10px; }
+      @media (prefers-reduced-motion: reduce) {
+        #goldDust { display: none; }
+      }
+
       /* ---------- LIGHTBOX ---------- */
       .lightbox {
         position: fixed;
@@ -637,6 +722,7 @@
   <body>
     <!-- ================= HERO ================= -->
     <header class="hero">
+      <canvas id="goldDust" aria-hidden="true"></canvas>
       <span class="kelas">KELAS XII-1</span>
       <img class="hero-logo" src="images/logo.png" alt="Logo ORNIVALIS — griffin berdiri di atas gunung berapi" />
       <h1>ORNIVALIS</h1>
@@ -646,6 +732,7 @@
         <span><b>37</b>&nbsp; Foto Kenangan</span>
         <span><b>3</b>&nbsp; Tahun Bersama</span>
         <span><b>1</b>&nbsp; Keluarga</span>
+        <span id="visitStat">👁 <b id="visitCount">…</b>&nbsp; Kunjungan</span>
       </div>
       <div class="hero-cta">
         <a class="btn btn-gold" href="#galeri">Lihat Galeri Kenangan</a>
@@ -1035,6 +1122,27 @@
         </div>
       </section>
 
+      <!-- ================= PESAN ================= -->
+      <section id="pesan">
+        <div class="sec-head reveal">
+          <h2>Pesan untuk ORNIVALIS</h2>
+          <p>Tinggalkan jejakmu di sini — satu nama, satu pesan, sejuta kenangan.</p>
+          <div class="rule"></div>
+        </div>
+        <form class="form-card reveal" id="msgForm">
+          <label for="msgName">Namamu *</label>
+          <input id="msgName" name="nama" type="text" maxlength="50" placeholder="Contoh: Leonard" required />
+          <label for="msgText">Pesanmu *</label>
+          <textarea id="msgText" name="pesan" rows="4" maxlength="500" placeholder="Tulis pesanmu untuk kelas…" required></textarea>
+          <div class="char-count" id="charCount">0/500</div>
+          <button class="msg-btn" id="msgSend" type="submit">Kirim Pesan ✦</button>
+          <p class="form-note" id="formNote"></p>
+        </form>
+        <div class="wall" id="wall">
+          <p class="msg-empty" id="wallEmpty">Belum ada pesan — jadilah yang pertama menulis untuk ORNIVALIS.</p>
+        </div>
+      </section>
+
       <!-- ================= PENUTUP ================= -->
       <div class="penutup reveal">
         <h2>Sampai Jumpa, ORNIVALIS</h2>
@@ -1047,6 +1155,7 @@
       <div class="foot-rule"></div>
       <b>KELAS XII-1 &middot; ORNIVALIS</b><br />
       Kenangan ini tidak akan pernah lulus dari hati kita.
+      <p class="visit-line" id="visitLine">👁 <b id="visitTotal">…</b> kunjungan &middot; <b id="visitToday">…</b> hari ini &middot; <a href="stats.html">Statistik pengunjung</a></p>
     </footer>
 
     <!-- ================= LIGHTBOX ================= -->
@@ -1240,6 +1349,236 @@
             frame.innerHTML = '<iframe src="' + frame.getAttribute("data-src") + '" title="' + frame.getAttribute("data-title") + '" allow="autoplay; fullscreen" allowfullscreen></iframe>';
           });
         }
+        /* ---------- Debu emas di hero: halaman lebih hidup ---------- */
+        var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var dustCanvas = document.getElementById("goldDust");
+        var dctx = dustCanvas ? dustCanvas.getContext("2d") : null;
+        if (dustCanvas && !reduceMotion && dctx) {
+          var dust = [];
+          var dustRunning = false;
+          var dustVisible = true;
+          function sizeDust() {
+            var hero = dustCanvas.parentNode;
+            var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+            dustCanvas.width = hero.clientWidth * dpr;
+            dustCanvas.height = hero.clientHeight * dpr;
+            dctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          }
+          function seedDust() {
+            var w = dustCanvas.parentNode.clientWidth;
+            var h = dustCanvas.parentNode.clientHeight;
+            dust = [];
+            for (var i = 0; i < 36; i++) {
+              dust.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                r: 0.8 + Math.random() * 2.1,
+                vy: -(0.08 + Math.random() * 0.22),
+                sway: 0.3 + Math.random() * 0.7,
+                phase: Math.random() * Math.PI * 2,
+                tw: 0.4 + Math.random() * 0.6
+              });
+            }
+          }
+          function drawDust(t) {
+            if (!dustRunning) return;
+            var w = dustCanvas.parentNode.clientWidth;
+            var h = dustCanvas.parentNode.clientHeight;
+            dctx.clearRect(0, 0, w, h);
+            for (var i = 0; i < dust.length; i++) {
+              var p = dust[i];
+              p.y += p.vy;
+              p.phase += 0.01;
+              if (p.y < -6) { p.y = h + 6; p.x = Math.random() * w; }
+              var x = p.x + Math.sin(p.phase) * p.sway * 8;
+              var a = 0.25 + 0.55 * Math.abs(Math.sin((t / 900) * p.tw + p.phase));
+              dctx.beginPath();
+              dctx.arc(x, p.y, p.r, 0, Math.PI * 2);
+              dctx.fillStyle = "rgba(231, 189, 98, " + a.toFixed(2) + ")";
+              dctx.fill();
+            }
+            requestAnimationFrame(drawDust);
+          }
+          function startDust() {
+            if (dustRunning || document.hidden || !dustVisible) return;
+            dustRunning = true;
+            requestAnimationFrame(drawDust);
+          }
+          function stopDust() { dustRunning = false; }
+          sizeDust();
+          seedDust();
+          if ("IntersectionObserver" in window) {
+            new IntersectionObserver(function (en) {
+              dustVisible = en[0].isIntersecting;
+              if (dustVisible) startDust(); else stopDust();
+            }).observe(dustCanvas.parentNode);
+          }
+          document.addEventListener("visibilitychange", function () {
+            if (document.hidden) stopDust(); else startDust();
+          });
+          window.addEventListener("resize", function () { sizeDust(); });
+          startDust();
+        }
+
+        /* ---------- Angka statistik naik saat pertama terlihat ---------- */
+        function countUp(el, target, dur) {
+          if (reduceMotion) { el.textContent = target; return; }
+          var start = null;
+          function step(ts) {
+            if (!start) start = ts;
+            var p = Math.min((ts - start) / dur, 1);
+            var eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.round(target * eased);
+            if (p < 1) requestAnimationFrame(step);
+          }
+          requestAnimationFrame(step);
+        }
+        document.querySelectorAll(".hero-stats b").forEach(function (b) {
+          var n = parseInt(b.textContent, 10);
+          if (!isNaN(n)) countUp(b, n, 900);
+        });
+
+        /* ---------- Percikan emas saat foto diketuk ---------- */
+        var gallery = document.querySelector(".gallery");
+        if (gallery && !reduceMotion) {
+          gallery.addEventListener("click", function (e) {
+            for (var i = 0; i < 7; i++) {
+              var s = document.createElement("span");
+              s.className = "sparkle";
+              s.style.left = e.clientX + "px";
+              s.style.top = e.clientY + "px";
+              document.body.appendChild(s);
+              var ang = (Math.PI * 2 * i) / 7 + Math.random() * 0.5;
+              var dist = 26 + Math.random() * 30;
+              var dx = Math.cos(ang) * dist;
+              var dy = Math.sin(ang) * dist - 14;
+              if (s.animate) {
+                s.animate([
+                  { transform: "translate(-50%, -50%) rotate(45deg) scale(1)", opacity: 1 },
+                  { transform: "translate(calc(-50% + " + dx + "px), calc(-50% + " + dy + "px)) rotate(225deg) scale(0.2)", opacity: 0 }
+                ], { duration: 650 + Math.random() * 200, easing: "cubic-bezier(.2,.7,.3,1)" }).onfinish = (function (el) {
+                  return function () { el.remove(); };
+                })(s);
+              } else {
+                s.remove();
+              }
+            }
+          });
+        }
+
+        /* ---------- Pengunjung + buku pesan (Worker ORNIVALIS) ---------- */
+        var API = "https://ornivalis-stats.muchammadleonardtaufikputra.workers.dev";
+        var visitStat = document.getElementById("visitStat");
+        var visitLine = document.getElementById("visitLine");
+
+        fetch(API + "/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}"
+        }).catch(function () {});
+        fetch(API + "/count").then(function (r) { return r.json(); }).then(function (d) {
+          var total = d.total || 0;
+          var today = d.today || 0;
+          var vc = document.getElementById("visitCount");
+          if (vc) countUp(vc, total, 900);
+          var vt = document.getElementById("visitTotal");
+          if (vt) vt.textContent = total;
+          var vy = document.getElementById("visitToday");
+          if (vy) vy.textContent = today;
+        }).catch(function () {
+          if (visitStat) visitStat.style.display = "none";
+          if (visitLine) visitLine.style.display = "none";
+        });
+
+        var wall = document.getElementById("wall");
+        var wallEmpty = document.getElementById("wallEmpty");
+        function fmtTime(t) {
+          try {
+            return new Date(t).toLocaleString("id-ID", {
+              timeZone: "Asia/Jakarta",
+              day: "numeric", month: "short", year: "numeric",
+              hour: "2-digit", minute: "2-digit"
+            });
+          } catch (e) { return ""; }
+        }
+        function msgCard(m) {
+          var card = document.createElement("article");
+          card.className = "msg-card";
+          var name = document.createElement("span");
+          name.className = "msg-name";
+          name.textContent = m.name;
+          var time = document.createElement("span");
+          time.className = "msg-time";
+          time.textContent = fmtTime(m.t);
+          var body = document.createElement("p");
+          body.textContent = m.message;
+          card.appendChild(name);
+          card.appendChild(time);
+          card.appendChild(body);
+          return card;
+        }
+        function loadMessages() {
+          fetch(API + "/messages").then(function (r) { return r.json(); }).then(function (d) {
+            var list = d.messages || [];
+            if (!list.length) return;
+            if (wallEmpty) wallEmpty.remove();
+            list.forEach(function (m) { wall.appendChild(msgCard(m)); });
+          }).catch(function () {});
+        }
+        loadMessages();
+
+        var form = document.getElementById("msgForm");
+        var nameInput = document.getElementById("msgName");
+        var textInput = document.getElementById("msgText");
+        var charCount = document.getElementById("charCount");
+        var formNote = document.getElementById("formNote");
+        var sendBtn = document.getElementById("msgSend");
+        textInput.addEventListener("input", function () {
+          charCount.textContent = textInput.value.length + "/500";
+        });
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          var name = nameInput.value.trim();
+          var text = textInput.value.trim();
+          formNote.className = "form-note";
+          if (name.length < 2) {
+            formNote.textContent = "Isi namamu dulu ya (minimal 2 huruf).";
+            formNote.classList.add("err");
+            nameInput.focus();
+            return;
+          }
+          if (!text) {
+            formNote.textContent = "Pesanmu masih kosong — tulis dulu ya.";
+            formNote.classList.add("err");
+            textInput.focus();
+            return;
+          }
+          sendBtn.disabled = true;
+          sendBtn.textContent = "Mengirim…";
+          fetch(API + "/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: name, message: text })
+          }).then(function (r) {
+            return r.json().then(function (d) { return { ok: r.ok, d: d }; });
+          }).then(function (res) {
+            if (!res.ok) throw new Error((res.d && res.d.error) || "Gagal mengirim pesan.");
+            if (wallEmpty) wallEmpty.remove();
+            wall.insertBefore(msgCard({ name: name, message: text, t: Date.now() }), wall.firstChild);
+            form.reset();
+            charCount.textContent = "0/500";
+            formNote.textContent = "Pesanmu sudah terkirim. Terima kasih sudah meninggalkan jejak di ORNIVALIS!";
+            formNote.classList.add("ok");
+          }).catch(function (err) {
+            formNote.textContent = err.message === "Failed to fetch"
+              ? "Server pesan belum aktif — coba lagi sebentar lagi."
+              : err.message;
+            formNote.classList.add("err");
+          }).finally(function () {
+            sendBtn.disabled = false;
+            sendBtn.textContent = "Kirim Pesan ✦";
+          });
+        });
       })();
     </script>
   </body>
