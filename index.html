@@ -77,11 +77,62 @@
         font-weight: 700;
         letter-spacing: 0.22em;
       }
-      .hero-logo {
+      .hero-logo-wrap {
+        position: relative;
         width: min(430px, 82vw);
         margin: 30px auto 6px;
+        cursor: pointer;
+      }
+      .hero-logo {
+        width: 100%;
+        display: block;
         border-radius: 14px;
         box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      }
+      /* Griffin terbang: cutout transparan di atas logo + penutup hitam untuk griffin diam */
+      .griffin-patch {
+        position: absolute;
+        left: 41.23%; top: 10.64%;
+        width: 35.53%; aspect-ratio: 405 / 220;
+        background: #000;
+      }
+      .griffin-fly {
+        position: absolute;
+        left: 41.23%; top: 10.64%;
+        width: 35.53%; aspect-ratio: 405 / 220;
+        z-index: 5;
+        pointer-events: none;
+      }
+      .griffin-fly img { width: 100%; display: block; }
+      .griffin-fly.flying { animation: griffinFly 4.2s ease-in-out forwards; }
+      .griffin-fly.flying img {
+        animation: griffinBob 0.45s ease-in-out infinite alternate;
+        filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.45));
+      }
+      @keyframes griffinFly {
+        0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        12% { transform: translate(30px, -70px) scale(0.96) rotate(-7deg); }
+        30% { transform: translate(150px, -150px) scale(0.82) rotate(6deg); }
+        48% { transform: translate(40px, -190px) scale(0.74) rotate(-5deg); }
+        66% { transform: translate(-120px, -130px) scale(0.82) rotate(7deg); }
+        82% { transform: translate(-70px, -50px) scale(0.94) rotate(-4deg); }
+        100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      }
+      @keyframes griffinBob {
+        from { transform: translateY(-5px); }
+        to { transform: translateY(5px); }
+      }
+      /* Di layar kecil, jarak terbangnya diperpendek supaya tetap di dalam layar */
+      @media (max-width: 650px) {
+        @keyframes griffinFly {
+          0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+          12% { transform: translate(18px, -45px) scale(0.96) rotate(-7deg); }
+          30% { transform: translate(90px, -95px) scale(0.82) rotate(6deg); }
+          48% { transform: translate(25px, -120px) scale(0.74) rotate(-5deg); }
+          66% { transform: translate(-75px, -85px) scale(0.82) rotate(7deg); }
+          82% { transform: translate(-45px, -35px) scale(0.94) rotate(-4deg); }
+          100% { transform: translate(0, 0) scale(1) rotate(0deg); }
+        }
       }
       .hero h1 {
         font-family: "Playfair Display", Georgia, serif;
@@ -567,9 +618,9 @@
         to { opacity: 1; transform: scaleX(1); }
       }
       /* Hero: elemen masuk bertahap saat halaman dibuka */
-      .hero .kelas, .hero-logo, .hero h1, .hero .tagline, .hero .sub,
+      .hero .kelas, .hero-logo-wrap, .hero h1, .hero .tagline, .hero .sub,
       .hero-stats, .hero-cta, .hero-photo { animation: riseIn 0.8s ease backwards; }
-      .hero-logo { animation-delay: 0.08s; }
+      .hero-logo-wrap { animation-delay: 0.08s; }
       .hero h1 { animation-delay: 0.16s; }
       .hero .tagline { animation-delay: 0.26s; }
       .hero .sub { animation-delay: 0.34s; }
@@ -588,8 +639,9 @@
         transform-origin: center;
         animation: growLine 0.9s ease 0.55s backwards;
       }
-      .hero-logo { transition: transform 0.4s ease; }
-      .hero-logo:hover { transform: scale(1.02) rotate(-0.5deg); }
+      .hero-logo-wrap { transition: transform 0.4s ease; }
+      .hero-logo-wrap:hover { transform: scale(1.02) rotate(-0.5deg); }
+      .hero-logo-wrap:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
       .hero-photo img { transition: transform 0.7s ease; }
       .hero-photo:hover img { transform: scale(1.025); }
       .hero-stats span { transition: transform 0.25s ease, border-color 0.25s ease; }
@@ -707,11 +759,11 @@
       .lightbox.open figure { animation: riseIn 0.3s ease; }
 
       @media (prefers-reduced-motion: reduce) {
-        .hero .kelas, .hero-logo, .hero h1, .hero .tagline, .hero .sub,
+        .hero .kelas, .hero-logo-wrap, .hero h1, .hero .tagline, .hero .sub,
         .hero-stats, .hero-cta, .hero-photo, .hero h1::after,
-        .lightbox.open figure, .shot.in { animation: none; }
+        .lightbox.open figure, .shot.in, .griffin-fly { animation: none; }
         .shot { opacity: 1; transform: none; transition: none; }
-        .quote, .ingatan li, .ingatan .num, .hero-photo img, .hero-logo,
+        .quote, .ingatan li, .ingatan .num, .hero-photo img, .hero-logo-wrap,
         .penutup img.logo-kecil, .hero-stats span, .chip, .quote .mark,
         .quote::after, .segel { transition: none; }
         .shot:hover, .quote:hover, .btn:hover, .chip:hover,
@@ -724,7 +776,11 @@
     <header class="hero">
       <canvas id="goldDust" aria-hidden="true"></canvas>
       <span class="kelas">KELAS XII-1</span>
-      <img class="hero-logo" src="images/logo.png" alt="Logo ORNIVALIS — griffin berdiri di atas gunung berapi" />
+      <div class="hero-logo-wrap" role="button" tabindex="0" aria-label="Putar animasi griffin terbang">
+        <img class="hero-logo" src="images/logo.png" alt="Logo ORNIVALIS — griffin berdiri di atas gunung berapi" />
+        <div class="griffin-patch" hidden></div>
+        <div class="griffin-fly" hidden><img src="images/griffin-fly.png" alt="" aria-hidden="true" /></div>
+      </div>
       <h1>ORNIVALIS</h1>
       <p class="tagline">&ldquo;Kita mungkin akan pergi ke arah yang berbeda, tapi kita akan selalu pulang ke cerita yang sama.&rdquo;</p>
       <p class="sub">Halaman ini dibuat untuk menyimpan tawa, lelah, dan semua momen kecil yang pernah kita bagi di satu kelas yang sama — sebelum waktu membawa kita ke jalan masing-masing.</p>
@@ -1343,6 +1399,40 @@
             if (v.paused) { userPaused.delete(v); playVideo(v); }
             else { userPaused.add(v); v.pause(); }
           });
+        }
+        /* ---------- Griffin: terbang lalu hinggap kembali ---------- */
+        var logoWrap = document.querySelector(".hero-logo-wrap");
+        if (logoWrap) {
+          var flyer = logoWrap.querySelector(".griffin-fly");
+          var patch = logoWrap.querySelector(".griffin-patch");
+          var reduceMotionGriffin = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+          var griffinFlying = false;
+          function griffinFly() {
+            if (reduceMotionGriffin || griffinFlying || !flyer || !patch) return;
+            griffinFlying = true;
+            patch.hidden = false;
+            flyer.hidden = false;
+            void flyer.offsetWidth;
+            flyer.classList.add("flying");
+          }
+          function griffinLand(e) {
+            if (e && e.target !== flyer) return;
+            flyer.classList.remove("flying");
+            flyer.hidden = true;
+            patch.hidden = true;
+            griffinFlying = false;
+          }
+          if (flyer) flyer.addEventListener("animationend", griffinLand);
+          logoWrap.addEventListener("click", griffinFly);
+          logoWrap.addEventListener("keydown", function (e) {
+            if (e.key === "Enter" || e.key === " ") { e.preventDefault(); griffinFly(); }
+          });
+          if (!reduceMotionGriffin) {
+            setTimeout(function () {
+              var r = logoWrap.getBoundingClientRect();
+              if (r.top < window.innerHeight && r.bottom > 0) griffinFly();
+            }, 1800);
+          }
         }
         /* ---------- Debu emas di hero: halaman lebih hidup ---------- */
         var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
