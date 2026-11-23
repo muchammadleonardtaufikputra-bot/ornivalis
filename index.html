@@ -181,11 +181,8 @@
         align-items: center;
         justify-content: center;
         text-align: center;
-        cursor: pointer;
-        animation: introAutoOut 0.6s ease 4.2s forwards;
       }
       #intro.out { opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
-      html.no-intro #intro { display: none; }
       .intro-inner { padding: 24px 18px; max-width: 560px; }
       .intro-logo {
         width: min(200px, 52vw);
@@ -252,7 +249,6 @@
       @keyframes introLetter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
       @keyframes introPhoto { from { opacity: 0; transform: scale(0.7) rotate(var(--r, 0deg)); } to { opacity: 1; transform: scale(1) rotate(var(--r, 0deg)); } }
       @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-      @keyframes introAutoOut { to { opacity: 0; visibility: hidden; } }
 
       /* Kilau emas menyapu logo + judul sekali saat hero tampil */
       .hero h1.shine { position: relative; overflow: hidden; }
@@ -842,12 +838,7 @@
         .ingatan li:hover, .hero-stats span:hover { transform: none; }
       }
     </style>
-    <script>
-      /* Layar pembuka cukup sekali per sesi — putuskan sebelum halaman digambar. */
-      try {
-        if (sessionStorage.getItem("ornivalis-intro") === "1") document.documentElement.classList.add("no-intro");
-      } catch (e) {}
-    </script>
+    <noscript><style>#intro { display: none; }</style></noscript>
   </head>
   <body>
     <!-- ================= LAYAR PEMBUKA ================= -->
@@ -1344,28 +1335,25 @@
               clearInterval(typeTimer);
               setTimeout(function () { if (caret.parentNode) caret.remove(); }, 1400);
             }
-          }, 30);
+          }, 55);
         }
-        function finishIntro(instant) {
+        function finishIntro(startTyping) {
           if (introDone) return;
           introDone = true;
           document.body.classList.add("intro-done");
-          try { sessionStorage.setItem("ornivalis-intro", "1"); } catch (e) {}
           if (introEl) {
             introEl.classList.add("out");
-            setTimeout(function () { if (introEl.parentNode) introEl.remove(); }, instant ? 120 : 550);
+            setTimeout(function () { if (introEl.parentNode) introEl.remove(); }, 550);
           }
-          if (!instant) setTimeout(startTypewriter, 1100);
+          if (startTyping) setTimeout(startTypewriter, 1100);
         }
-        if (introEl && !reduceMotionIntro && !document.documentElement.classList.contains("no-intro")) {
-          var introTimer = setTimeout(function () { finishIntro(false); }, 3000);
-          introEl.addEventListener("click", function () { clearTimeout(introTimer); finishIntro(true); });
-          document.addEventListener("keydown", function (e) {
-            if (e.key === "Escape" || e.key === "Enter") { clearTimeout(introTimer); finishIntro(true); }
-          });
+        /* Layar pembuka TIDAK hilang sendiri — hanya tombol Lewati yang menutupnya. */
+        var skipBtn = introEl ? introEl.querySelector(".intro-skip") : null;
+        if (introEl && !reduceMotionIntro) {
+          if (skipBtn) skipBtn.addEventListener("click", function () { finishIntro(true); });
         } else {
           if (introEl) introEl.remove();
-          finishIntro(true);
+          finishIntro(false);
         }
 
         /* ---------- Filter galeri ---------- */
