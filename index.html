@@ -77,11 +77,18 @@
         font-weight: 700;
         letter-spacing: 0.22em;
       }
-      .hero-logo {
+      .logo-shine {
+        position: relative;
+        display: block;
         width: min(430px, 82vw);
         margin: 30px auto 6px;
         border-radius: 14px;
+        overflow: hidden;
         box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      }
+      .hero-logo {
+        width: 100%;
+        border-radius: 14px;
       }
       .hero h1 {
         font-family: "Playfair Display", Georgia, serif;
@@ -162,6 +169,116 @@
         font-style: italic;
         padding: 12px 18px;
       }
+
+      /* ---------- LAYAR PEMBUKA + KILAU EMAS + TEKS MENGETIK ---------- */
+      #intro {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: #0a1322;
+        color: #f3ecd9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        cursor: pointer;
+        animation: introAutoOut 0.6s ease 4.2s forwards;
+      }
+      #intro.out { opacity: 0; pointer-events: none; transition: opacity 0.5s ease; }
+      html.no-intro #intro { display: none; }
+      .intro-inner { padding: 24px 18px; max-width: 560px; }
+      .intro-logo {
+        width: min(200px, 52vw);
+        margin: 0 auto 12px;
+        border-radius: 12px;
+        box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+        animation: introPop 0.7s ease backwards;
+      }
+      .intro-title {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 800;
+        font-size: clamp(2.4rem, 10vw, 4rem);
+        letter-spacing: 0.12em;
+        line-height: 1.05;
+        color: #fdf8ec;
+        margin: 0;
+      }
+      .intro-title span { display: inline-block; opacity: 0; animation: introLetter 0.5s ease forwards; }
+      .intro-title span:nth-child(1) { animation-delay: 0.25s; }
+      .intro-title span:nth-child(2) { animation-delay: 0.31s; }
+      .intro-title span:nth-child(3) { animation-delay: 0.37s; }
+      .intro-title span:nth-child(4) { animation-delay: 0.43s; }
+      .intro-title span:nth-child(5) { animation-delay: 0.49s; }
+      .intro-title span:nth-child(6) { animation-delay: 0.55s; }
+      .intro-title span:nth-child(7) { animation-delay: 0.61s; }
+      .intro-title span:nth-child(8) { animation-delay: 0.67s; }
+      .intro-title span:nth-child(9) { animation-delay: 0.73s; }
+      .intro-line {
+        width: 118px; height: 2px;
+        background: rgba(217, 171, 78, 0.9);
+        margin: 16px auto 0;
+        transform: scaleX(0);
+        animation: growLine 0.7s ease 0.85s forwards;
+      }
+      .intro-photos { display: flex; gap: 12px; justify-content: center; margin: 20px 0 4px; }
+      .intro-photos img {
+        width: 76px; height: 76px;
+        object-fit: cover;
+        border-radius: 12px;
+        border: 2px solid rgba(217, 171, 78, 0.7);
+        opacity: 0;
+        animation: introPhoto 0.5s ease forwards;
+      }
+      .intro-photos img:nth-child(1) { --r: -4deg; animation-delay: 1.15s; }
+      .intro-photos img:nth-child(2) { --r: 2deg; animation-delay: 1.55s; }
+      .intro-photos img:nth-child(3) { --r: -2deg; animation-delay: 1.95s; }
+      .intro-sub {
+        color: #c8b586;
+        font-style: italic;
+        margin: 14px 0 0;
+        animation: fadeIn 0.6s ease 2.15s backwards;
+      }
+      .intro-skip {
+        margin-top: 20px;
+        background: transparent;
+        border: 1px solid rgba(217, 171, 78, 0.55);
+        color: #e7bd62;
+        border-radius: 999px;
+        padding: 8px 20px;
+        font-weight: 700;
+        animation: fadeIn 0.6s ease 2.35s backwards;
+      }
+      @keyframes introPop { from { opacity: 0; transform: scale(0.85) translateY(10px); } to { opacity: 1; transform: none; } }
+      @keyframes introLetter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+      @keyframes introPhoto { from { opacity: 0; transform: scale(0.7) rotate(var(--r, 0deg)); } to { opacity: 1; transform: scale(1) rotate(var(--r, 0deg)); } }
+      @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+      @keyframes introAutoOut { to { opacity: 0; visibility: hidden; } }
+
+      /* Kilau emas menyapu logo + judul sekali saat hero tampil */
+      .hero h1.shine { position: relative; overflow: hidden; }
+      .logo-shine::after, .hero h1.shine::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, transparent 42%, rgba(255, 222, 140, 0.75) 50%, transparent 58%);
+        transform: translateX(-130%);
+        pointer-events: none;
+      }
+      .hero h1.shine::before { background: linear-gradient(105deg, transparent 42%, rgba(255, 222, 140, 0.55) 50%, transparent 58%); }
+      body.intro-done .logo-shine::after, body.intro-done .hero h1.shine::before { animation: shineSweep 1.2s ease 0.55s forwards; }
+      @keyframes shineSweep { to { transform: translateX(130%); } }
+
+      /* Kursor teks mengetik di tagline */
+      .tagline.typing .type-caret {
+        display: inline-block;
+        width: 2px;
+        height: 1em;
+        background: #e7bd62;
+        margin-left: 2px;
+        vertical-align: -0.12em;
+        animation: caretBlink 0.8s steps(1) infinite;
+      }
+      @keyframes caretBlink { 50% { opacity: 0; } }
 
       /* ---------- SECTIONS ---------- */
       section { padding: 72px 0 8px; }
@@ -566,9 +683,13 @@
         from { opacity: 0; transform: scaleX(0); }
         to { opacity: 1; transform: scaleX(1); }
       }
-      /* Hero: elemen masuk bertahap saat halaman dibuka */
-      .hero .kelas, .hero-logo, .hero h1, .hero .tagline, .hero .sub,
-      .hero-stats, .hero-cta, .hero-photo { animation: riseIn 0.8s ease backwards; }
+      /* Hero: elemen masuk bertahap setelah layar pembuka selesai.
+         Dijalankan lewat body.intro-done supaya animasi tidak habis
+         di balik splash saat kunjungan pertama. */
+      body.intro-done .hero .kelas, body.intro-done .hero-logo, body.intro-done .hero h1,
+      body.intro-done .hero .tagline, body.intro-done .hero .sub,
+      body.intro-done .hero-stats, body.intro-done .hero-cta,
+      body.intro-done .hero-photo { animation: riseIn 0.8s ease backwards; }
       .hero-logo { animation-delay: 0.08s; }
       .hero h1 { animation-delay: 0.16s; }
       .hero .tagline { animation-delay: 0.26s; }
@@ -579,7 +700,7 @@
       .hero .kelas::before, .hero .kelas::after { content: "✦"; font-size: 0.62rem; vertical-align: 2px; }
       .hero .kelas::before { margin-right: 9px; }
       .hero .kelas::after { margin-left: 9px; }
-      .hero h1::after {
+      body.intro-done .hero h1::after {
         content: "";
         display: block;
         width: 118px; height: 2px;
@@ -707,9 +828,12 @@
       .lightbox.open figure { animation: riseIn 0.3s ease; }
 
       @media (prefers-reduced-motion: reduce) {
+        #intro { display: none; }
         .hero .kelas, .hero-logo, .hero h1, .hero .tagline, .hero .sub,
         .hero-stats, .hero-cta, .hero-photo, .hero h1::after,
-        .lightbox.open figure, .shot.in { animation: none; }
+        .lightbox.open figure, .shot.in,
+        .logo-shine::after, .hero h1.shine::before { animation: none; }
+        .type-caret { display: none; }
         .shot { opacity: 1; transform: none; transition: none; }
         .quote, .ingatan li, .ingatan .num, .hero-photo img, .hero-logo,
         .penutup img.logo-kecil, .hero-stats span, .chip, .quote .mark,
@@ -718,14 +842,36 @@
         .ingatan li:hover, .hero-stats span:hover { transform: none; }
       }
     </style>
+    <script>
+      /* Layar pembuka cukup sekali per sesi — putuskan sebelum halaman digambar. */
+      try {
+        if (sessionStorage.getItem("ornivalis-intro") === "1") document.documentElement.classList.add("no-intro");
+      } catch (e) {}
+    </script>
   </head>
   <body>
+    <!-- ================= LAYAR PEMBUKA ================= -->
+    <div id="intro" role="dialog" aria-label="Pembuka Kenangan ORNIVALIS">
+      <div class="intro-inner">
+        <img class="intro-logo" src="images/logo.png" alt="" aria-hidden="true" />
+        <p class="intro-title" aria-label="ORNIVALIS"><span aria-hidden="true">O</span><span aria-hidden="true">R</span><span aria-hidden="true">N</span><span aria-hidden="true">I</span><span aria-hidden="true">V</span><span aria-hidden="true">A</span><span aria-hidden="true">L</span><span aria-hidden="true">I</span><span aria-hidden="true">S</span></p>
+        <div class="intro-line" aria-hidden="true"></div>
+        <div class="intro-photos" aria-hidden="true">
+          <img src="images/foto-39.jpg" alt="" />
+          <img src="images/foto-02.jpg" alt="" />
+          <img src="images/foto-32.jpg" alt="" />
+        </div>
+        <p class="intro-sub">Kelas XII-1 &middot; kenangan yang takkan lulus</p>
+        <button class="intro-skip" type="button">Lewati &rsaquo;</button>
+      </div>
+    </div>
+
     <!-- ================= HERO ================= -->
     <header class="hero">
       <canvas id="goldDust" aria-hidden="true"></canvas>
       <span class="kelas">KELAS XII-1</span>
-      <img class="hero-logo" src="images/logo.png" alt="Logo ORNIVALIS — griffin berdiri di atas gunung berapi" />
-      <h1>ORNIVALIS</h1>
+      <span class="logo-shine"><img class="hero-logo" src="images/logo.png" alt="Logo ORNIVALIS — griffin berdiri di atas gunung berapi" /></span>
+      <h1 class="shine">ORNIVALIS</h1>
       <p class="tagline">&ldquo;Kita mungkin akan pergi ke arah yang berbeda, tapi kita akan selalu pulang ke cerita yang sama.&rdquo;</p>
       <p class="sub">Halaman ini dibuat untuk menyimpan tawa, lelah, dan semua momen kecil yang pernah kita bagi di satu kelas yang sama — sebelum waktu membawa kita ke jalan masing-masing.</p>
       <div class="hero-stats">
@@ -1173,6 +1319,54 @@
     <script>
       (function () {
         "use strict";
+
+        /* ---------- Layar pembuka + kilau + teks mengetik ---------- */
+        var reduceMotionIntro = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        var introEl = document.getElementById("intro");
+        var taglineEl = document.querySelector(".hero .tagline");
+        var TYPE_TEXT = "\u201CKita mungkin akan pergi ke arah yang berbeda, tapi kita akan selalu pulang ke cerita yang sama.\u201D";
+        var introDone = false;
+        var typeTimer = null;
+        function startTypewriter() {
+          if (!taglineEl || reduceMotionIntro) return;
+          taglineEl.textContent = "";
+          taglineEl.classList.add("typing");
+          var caret = document.createElement("span");
+          caret.className = "type-caret";
+          caret.setAttribute("aria-hidden", "true");
+          taglineEl.appendChild(caret);
+          var i = 0;
+          typeTimer = setInterval(function () {
+            i++;
+            taglineEl.textContent = TYPE_TEXT.slice(0, i);
+            taglineEl.appendChild(caret);
+            if (i >= TYPE_TEXT.length) {
+              clearInterval(typeTimer);
+              setTimeout(function () { if (caret.parentNode) caret.remove(); }, 1400);
+            }
+          }, 30);
+        }
+        function finishIntro(instant) {
+          if (introDone) return;
+          introDone = true;
+          document.body.classList.add("intro-done");
+          try { sessionStorage.setItem("ornivalis-intro", "1"); } catch (e) {}
+          if (introEl) {
+            introEl.classList.add("out");
+            setTimeout(function () { if (introEl.parentNode) introEl.remove(); }, instant ? 120 : 550);
+          }
+          if (!instant) setTimeout(startTypewriter, 1100);
+        }
+        if (introEl && !reduceMotionIntro && !document.documentElement.classList.contains("no-intro")) {
+          var introTimer = setTimeout(function () { finishIntro(false); }, 3000);
+          introEl.addEventListener("click", function () { clearTimeout(introTimer); finishIntro(true); });
+          document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" || e.key === "Enter") { clearTimeout(introTimer); finishIntro(true); }
+          });
+        } else {
+          if (introEl) introEl.remove();
+          finishIntro(true);
+        }
 
         /* ---------- Filter galeri ---------- */
         var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
