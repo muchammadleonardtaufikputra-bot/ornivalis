@@ -66,16 +66,17 @@ function sourceFrom(ref) {
 
 function corsHeaders() {
   return {
-    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Origin": "https://muchammadleonardtaufikputra-bot.github.io",
     "Access-Control-Allow-Methods": "GET,POST,DELETE,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, X-Admin-Key",
+    "Vary": "Origin",
   };
 }
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { "Content-Type": "application/json", ...corsHeaders() },
+    headers: { "Content-Type": "application/json; charset=utf-8", "X-Content-Type-Options": "nosniff", "Cache-Control": "no-store", "Referrer-Policy": "no-referrer", ...corsHeaders() },
   });
 }
 
@@ -178,7 +179,7 @@ async function handleGetMessages(env) {
 
 async function handleDeleteMessage(req, env) {
   const url = new URL(req.url);
-  const key = url.searchParams.get("key") || "";
+  const key = req.headers.get("X-Admin-Key") || url.searchParams.get("key") || "";
   if (!env.ORNIVALIS_STATS_PASSWORD || key !== env.ORNIVALIS_STATS_PASSWORD) {
     return json({ error: "unauthorized" }, 401);
   }
