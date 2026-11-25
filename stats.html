@@ -204,7 +204,7 @@
         }
 
         function loadStatsCount() {
-          fetch(API + "/stats?key=" + encodeURIComponent(key))
+          fetch(API + "/stats", { headers: { "X-Admin-Key": key } })
             .then(function (r) { return r.json(); })
             .then(function (d) {
               document.getElementById("stMsg").textContent = d.messagesTotal || 0;
