@@ -9,7 +9,7 @@
     <title>Kenangan Kelas XII-1 ORNIVALIS</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,800;1,500;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet" />
     <style>
       :root {
         --bg: #f6f2ea;
@@ -199,6 +199,37 @@
       .marquee-track { display: inline-block; animation: marquee 32s linear infinite; }
       @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
       .marquee:hover .marquee-track { animation-play-state: paused; }
+
+      /* ---------- TEKS RAKSASA HANTU ---------- */
+      /* Tulisan ORNIVALIS raksasa yang berjalan pelan di belakang semua section. */
+      .ghost-text {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        overflow: hidden;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+      }
+      .ghost-track {
+        display: flex;
+        flex-shrink: 0;
+        animation: ghostScroll 60s linear infinite;
+      }
+      .ghost-track span {
+        font-family: "Playfair Display", Georgia, serif;
+        font-weight: 800;
+        font-size: 18vw;
+        line-height: 1;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        color: rgba(217, 171, 78, 0.07);
+        -webkit-text-stroke: 1px rgba(201, 151, 63, 0.22);
+        padding-right: 0.35em;
+      }
+      @keyframes ghostScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+      /* Konten section di atas teks hantu; splash (z-100), lightbox (z-60), dan slideshow (z-70) tetap di atas. */
+      section, .penutup, footer, .marquee { position: relative; z-index: 2; }
 
       /* ---------- LAYAR PEMBUKA + KILAU EMAS + TEKS MENGETIK ---------- */
       #intro {
@@ -419,12 +450,28 @@
       @media (prefers-color-scheme: dark) {
         .chip[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: #201503; }
       }
-      .gallery { columns: 3; column-gap: 18px; }
-      @media (max-width: 900px) { .gallery { columns: 2; } }
-      @media (max-width: 460px) { .gallery { columns: 2; column-gap: 12px; } }
+      /* ---------- GALERI MASONRY ACAK ---------- */
+      /* Grid padat: ukuran foto acak-acak (besar/tinggi/lebar) lewat kelas .big/.tall/.wide. */
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-auto-flow: dense;
+        grid-auto-rows: 150px;
+        gap: 18px;
+      }
+      @media (max-width: 900px) { .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+      @media (max-width: 650px) {
+        .gallery { grid-auto-rows: 100px; gap: 12px; }
+        /* HP: semua ukuran disamakan, 2 kolom rapi tanpa celah aneh. */
+        .gallery .shot.big, .gallery .shot.tall, .gallery .shot.wide { grid-column: span 1; grid-row: span 2; }
+      }
+      .gallery .shot.big { grid-column: span 2; grid-row: span 3; }
+      .gallery .shot.tall { grid-row: span 3; }
+      .gallery .shot.wide { grid-column: span 2; }
       .shot {
-        break-inside: avoid;
-        margin: 0 0 18px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
         background: #fffdf8;
         padding: 10px 10px 12px;
         border-radius: 6px;
@@ -434,13 +481,14 @@
       .shot button.thumb {
         display: block;
         width: 100%;
+        flex: 1 1 auto;
+        min-height: 0;
         padding: 0;
         border: 0;
         background: none;
-        min-height: 0;
       }
-      .shot img { width: 100%; height: auto; border-radius: 4px; transition: transform 0.35s ease; }
-      .shot button.thumb:hover img, .shot button.thumb:focus-visible img { transform: scale(1.03); }
+      .shot img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; transition: transform 0.35s ease; }
+      .shot button.thumb:hover img, .shot button.thumb:focus-visible img { transform: scale(1.06); }
       .shot figcaption {
         padding: 10px 2px 2px;
         font-size: 0.92rem;
@@ -454,6 +502,46 @@
         color: var(--ink-soft);
         padding: 30px 0;
       }
+
+      /* ---------- PANORAMA 360 DRAG ---------- */
+      .pano {
+        position: relative;
+        overflow: hidden;
+        border-radius: 18px;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+        aspect-ratio: 21 / 9;
+        cursor: grab;
+        touch-action: pan-y;
+        outline-offset: 4px;
+      }
+      .pano.dragging { cursor: grabbing; }
+      .pano-track { width: 220%; height: 100%; will-change: transform; }
+      .pano-track img { width: 100%; height: 100%; object-fit: cover; display: block; user-select: none; -webkit-user-drag: none; }
+      .pano-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 2;
+        width: 46px;
+        height: 46px;
+        min-height: 46px;
+        border-radius: 50%;
+        background: rgba(10, 19, 34, 0.55);
+        color: #f3ecd9;
+        border: 1px solid rgba(217, 171, 78, 0.65);
+        font-size: 1.5rem;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+      }
+      .pano-btn:hover { background: rgba(217, 171, 78, 0.9); color: #201503; }
+      .pano-prev { left: 12px; }
+      .pano-next { right: 12px; }
+      .pano-hint { text-align: center; color: var(--ink-soft); font-size: 0.95rem; margin: 14px 0 0; }
+      @media (max-width: 650px) { .pano { aspect-ratio: 16 / 9; } }
 
       /* ---------- KATA-KATA ---------- */
       .quotes {
@@ -557,7 +645,7 @@
       footer b { color: var(--ink); letter-spacing: 0.14em; }
 
       /* ---------- DEBU EMAS + PESAN + PENGUNJUNG ---------- */
-      .hero { position: relative; }
+      .hero { position: relative; z-index: 2; }
       #goldDust {
         position: absolute;
         inset: 0;
@@ -621,25 +709,67 @@
       .form-note { margin: 12px 0 0; font-size: 0.92rem; min-height: 1.2em; }
       .form-note.err { color: #b3261e; font-weight: 600; }
       .form-note.ok { color: #1e7d46; font-weight: 600; }
-      /* Dinding pesan: bubble chat selang-seling kiri/kanan, melayang ikut scroll */
-      .wall { display: flex; flex-direction: column; gap: 14px; max-width: 720px; margin: 0 auto; }
-      .msg-card {
-        max-width: 82%;
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 18px;
-        padding: 12px 16px 10px;
-        text-align: left;
-        box-shadow: 0 6px 16px rgba(28, 36, 52, 0.07);
-        transition: transform 0.25s ease, box-shadow 0.25s ease;
-        will-change: translate;
+      /* Dinding sticky notes: catatan tempel warna-warni, miring-miring, bisa di-drag. */
+      .wall {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 22px 16px;
+        justify-content: center;
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 20px 6px 10px;
       }
-      .msg-card:nth-of-type(odd) { align-self: flex-start; border-bottom-left-radius: 6px; }
-      .msg-card:nth-of-type(even) { align-self: flex-end; border-bottom-right-radius: 6px; background: #fbefc8; }
-      .msg-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-      .msg-card .msg-name { font-weight: 800; color: var(--navy); font-size: 0.92rem; }
-      .msg-card .msg-time { display: block; font-size: 0.78rem; color: var(--ink-soft); margin: 2px 0 6px; }
-      .msg-card p { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; }
+      .msg-card {
+        position: relative;
+        flex: 0 1 240px;
+        max-width: 280px;
+        min-height: 190px;
+        background: #ffec99;
+        border-radius: 4px;
+        padding: 36px 18px 16px;
+        text-align: left;
+        box-shadow: 0 10px 22px rgba(28, 36, 52, 0.18);
+        transform: rotate(var(--note-rot, 0deg)) translate(var(--dx, 0px), var(--dy, 0px));
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        cursor: grab;
+        touch-action: pan-y;
+        will-change: transform;
+      }
+      /* Selotip di atas tiap catatan */
+      .msg-card::before {
+        content: "";
+        position: absolute;
+        top: -11px;
+        left: 50%;
+        width: 92px;
+        height: 24px;
+        transform: translateX(-50%) rotate(-2deg);
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.65);
+        box-shadow: 0 2px 5px rgba(28, 36, 52, 0.12);
+      }
+      /* Warna pastel bergiliran */
+      .msg-card:nth-of-type(5n+1) { background: #ffec99; }
+      .msg-card:nth-of-type(5n+2) { background: #ffd3e3; }
+      .msg-card:nth-of-type(5n+3) { background: #cde7ff; }
+      .msg-card:nth-of-type(5n+4) { background: #d9f2dd; }
+      .msg-card:nth-of-type(5n+5) { background: #ffe0b8; }
+      /* Miring acak */
+      .msg-card:nth-of-type(4n+1) { --note-rot: -2.6deg; }
+      .msg-card:nth-of-type(4n+2) { --note-rot: 2.2deg; }
+      .msg-card:nth-of-type(4n+3) { --note-rot: -1.4deg; }
+      .msg-card:nth-of-type(4n+4) { --note-rot: 3deg; }
+      .msg-card:hover { transform: rotate(var(--note-rot, 0deg)) translate(var(--dx, 0px), var(--dy, 0px)) scale(1.04); box-shadow: 0 16px 30px rgba(28, 36, 52, 0.22); }
+      .msg-card.dragging {
+        z-index: 5;
+        cursor: grabbing;
+        transition: none;
+        transform: rotate(var(--note-rot, 0deg)) translate(var(--dx, 0px), var(--dy, 0px)) scale(1.06);
+        box-shadow: 0 20px 36px rgba(28, 36, 52, 0.3);
+      }
+      .msg-card .msg-name { font-weight: 800; color: #1c2434; font-size: 0.95rem; }
+      .msg-card .msg-time { display: block; font-size: 0.78rem; color: rgba(28, 36, 52, 0.6); margin: 2px 0 8px; }
+      .msg-card p { margin: 0; white-space: pre-wrap; overflow-wrap: break-word; font-family: "Caveat", "Segoe Script", cursive; font-size: 1.4rem; font-weight: 600; line-height: 1.35; color: #1c2434; }
       .msg-empty { text-align: center; color: var(--ink-soft); padding: 22px 10px; }
       @media (prefers-reduced-motion: reduce) {
         #goldDust { display: none; }
@@ -855,7 +985,7 @@
       .shot:nth-child(3n+1) { --tilt: 1deg; }
       .shot:nth-child(3n+2) { --tilt: -0.6deg; }
       .shot:nth-child(3n) { --tilt: -1.2deg; }
-      .shot:hover, .shot:focus-within { transform: rotate(0deg) scale(1.03); box-shadow: 0 16px 34px rgba(28, 36, 52, 0.16); }
+      .shot:hover, .shot:focus-within { transform: rotate(0deg) scale(1.08); box-shadow: 0 22px 44px rgba(28, 36, 52, 0.24); }
 
       /* Foto melayang-layang: naik-turun halus, tiap foto beda ritme */
       @keyframes melayang {
@@ -935,20 +1065,23 @@
         .hero .kelas, .hero-logo, .hero h1, .hero .tagline, .hero .sub,
         .hero-stats, .hero-cta, .hero-photo, .hero h1::after,
         .lightbox.open figure, .shot.in,
-        .logo-shine::after, .hero h1.shine::before { animation: none; }
+        .logo-shine::after, .hero h1.shine::before, .ghost-track { animation: none; }
         .type-caret { display: none; }
         .shot { opacity: 1; transform: none; transition: none; }
         .quote, .ingatan li, .ingatan .num, .hero-photo img, .hero-logo,
         .penutup img.logo-kecil, .hero-stats span, .chip, .quote .mark,
-        .quote::after, .segel { transition: none; }
+        .quote::after, .segel, .msg-card { transition: none; }
         .shot:hover, .shot:focus-within, .quote:hover, .btn:hover, .chip:hover,
-        .ingatan li:hover, .hero-stats span:hover { transform: none; }
+        .ingatan li:hover, .hero-stats span:hover, .msg-card:hover { transform: none; }
         .marquee-track { animation: none; }
       }
     </style>
     <noscript><style>#intro { display: none; }</style></noscript>
   </head>
   <body>
+    <!-- ================= TEKS RAKSASA HANTU ================= -->
+    <div class="ghost-text" aria-hidden="true"><div class="ghost-track"><span>ORNIVALIS</span><span>ORNIVALIS</span></div></div>
+
     <!-- ================= LAYAR PEMBUKA ================= -->
     <div id="intro" role="dialog" aria-label="Pembuka Kenangan ORNIVALIS">
       <div class="intro-inner">
@@ -1015,6 +1148,21 @@
         </article>
       </section>
 
+      <!-- ================= PANORAMA ================= -->
+      <section id="panorama">
+        <div class="sec-head reveal">
+          <h2>Panorama Satu Kelas</h2>
+          <p>Satu kelas lengkap dalam satu bentangan — geser untuk melihat semuanya.</p>
+          <div class="rule"></div>
+        </div>
+        <div class="pano reveal" id="pano" tabindex="0" role="region" aria-label="Panorama satu kelas — geser kiri kanan atau pakai tombol panah">
+          <div class="pano-track" id="panoTrack"><img src="images/foto-67.jpg" alt="Foto panorama seluruh kelas XII-1 ORNIVALIS berfoto formal bersama guru" draggable="false" /></div>
+          <button class="pano-btn pano-prev" id="panoPrev" type="button" aria-label="Geser panorama ke kiri">&#8249;</button>
+          <button class="pano-btn pano-next" id="panoNext" type="button" aria-label="Geser panorama ke kanan">&#8250;</button>
+        </div>
+        <p class="pano-hint">Geser untuk melihat satu kelas</p>
+      </section>
+
       <!-- ================= GALERI ================= -->
       <section id="galeri">
         <div class="sec-head reveal">
@@ -1059,7 +1207,7 @@
             <figcaption><b>Peace di Atas Wahana</b>Karena hari itu, beban pikiran cuma satu: antrean wahana berikutnya.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot tall" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Anak IC di PC 4 dan PC 9">
               <img src="images/foto-06.jpg" alt="Anak-anak IC berpose di depan komputer PC 4 dan PC 9" />
             </button>
@@ -1073,7 +1221,7 @@
             <figcaption><b>Meja Panjang, Cerita Lebih Panjang</b>Makanannya sederhana, tapi obrolan di meja ini tidak pernah ada habisnya.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="tour">
+          <figure class="shot big" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Satu Kelas, Satu Hari">
               <img src="images/foto-08.jpg" alt="Foto grup besar kelas saat study tour" />
             </button>
@@ -1094,14 +1242,14 @@
             <figcaption><b>Jam Boleh Berjalan</b>Jam di dinding itu terus berputar, tapi momen seperti ini berhenti selamanya di ingatan.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="tour">
+          <figure class="shot tall" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Di Bawah Pohon Rindang">
               <img src="images/foto-11.jpg" alt="Foto bersama kelas di bawah pepohonan rindang" />
             </button>
             <figcaption><b>Di Bawah Pohon Rindang</b>Kita pernah sebahagia ini, sesederhana ini, dan seutuh ini.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="tour">
+          <figure class="shot wide" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Teriakan Paling Jujur">
               <img src="images/foto-12.jpg" alt="Dua siswa memberi jempol sambil tersenyum di atas wahana taman bermain" />
             </button>
@@ -1122,14 +1270,14 @@
             <figcaption><b>Pose Andalan Anak IC</b>Senyum seperti ini yang nanti akan paling kita rindukan. Akui saja.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="tour">
+          <figure class="shot big" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Makan Bersama Terakhir-Terakhir Ini">
               <img src="images/foto-15.jpg" alt="Foto selfie rombongan kelas saat makan bersama" />
             </button>
             <figcaption><b>Makan Bersama</b>Kumpul, makan, foto, ulangi. Rutinitas sederhana yang diam-diam jadi paling berharga.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="tour">
+          <figure class="shot tall" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Tiga Sekawan">
               <img src="images/foto-16.jpg" alt="Tiga siswa berpose di koridor kaca kebun binatang" />
             </button>
@@ -1164,21 +1312,21 @@
             <figcaption><b>Berpegangan Erat</b>Seperti kita memegang kenangan ini — erat-erat, jangan sampai lepas.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="tour">
+          <figure class="shot tall" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Tersenyum Selagi Bisa">
               <img src="images/foto-21.jpg" alt="Grup kelas berfoto bersama di area terbuka saat study tour" />
             </button>
             <figcaption><b>Tersenyum Selagi Bisa</b>Karena kita tidak pernah tahu foto mana yang akan jadi foto terakhir kita bersama.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="tour">
+          <figure class="shot big" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Gas Terus">
               <img src="images/foto-22.jpg" alt="Seorang siswa menaiki mobil-mobilan di arena permainan" />
             </button>
             <figcaption><b>Gas Terus</b>Melaju tanpa ragu — seperti cara kita mengejar mimpi setelah lulus nanti.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="tour">
+          <figure class="shot wide" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Gerbang Secret Zoo">
               <img src="images/foto-24.jpg" alt="Kelas berfoto bersama di depan gerbang Batu Secret Zoo" />
             </button>
@@ -1198,7 +1346,7 @@
             </button>
             <figcaption><b>Nyetir Jerapah</b>Mobil bumper bermotif jerapah — setirnya dipegang erat, tawanya tidak bisa ditahan.</figcaption>
           </figure>
-          <figure class="shot" data-cat="tour">
+          <figure class="shot tall" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Selfie di Wahana Gelap">
               <img src="images/foto-28.jpg" alt="Sekelompok siswa berfoto selfie di dalam wahana gelap" />
             </button>
@@ -1216,7 +1364,7 @@
             </button>
             <figcaption><b>Duo di Animal Bumper</b>Pose andalan di depan arena Animal Bumper.</figcaption>
           </figure>
-          <figure class="shot" data-cat="tour">
+          <figure class="shot big" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Kumpul di Saung Teduh">
               <img src="images/foto-32.jpg" alt="Sekelompok siswa berfoto bersama di bawah saung" />
             </button>
@@ -1228,7 +1376,7 @@
             </button>
             <figcaption><b>Pose Bareng Dinosaurus</b>Dinosaurusnya diam, kita yang heboh.</figcaption>
           </figure>
-          <figure class="shot" data-cat="tour">
+          <figure class="shot tall" data-cat="tour">
             <button class="thumb" type="button" aria-label="Perbesar foto: Rombongan di Depan Kandang">
               <img src="images/foto-34.jpg" alt="Sekelompok siswa berfoto di depan kandang satwa" />
             </button>
@@ -1246,7 +1394,7 @@
             </button>
             <figcaption><b>Gedung Museum Satwa</b>Gedungnya megah, gajahnya setia menjaga.</figcaption>
           </figure>
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot wide" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Pose di Depan Kelas">
               <img src="images/foto-37.jpg" alt="Dua siswa berpose di depan kelas dengan teman-teman di belakang" />
             </button>
@@ -1258,7 +1406,7 @@
             </button>
             <figcaption><b>Membentangkan Spanduk</b>Spanduk ORNIVALIS dibentangkan — kelas kami, nama kami.</figcaption>
           </figure>
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot big" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Foto Satu Kelas">
               <img src="images/foto-39.jpg" alt="Seluruh kelas berfoto bersama di ruang kelas dengan spanduk ORNIVALIS" />
             </button>
@@ -1292,7 +1440,7 @@
             <figcaption><b>Buket untuk Guru</b>Buketnya dari cokelat, tapi manisnya kalah sama senyum beliau.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot tall" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Peace untuk Pak Guru">
               <img src="images/foto-44.jpg" alt="Siswa dan guru berpose peace dengan buket cokelat" />
             </button>
@@ -1306,7 +1454,7 @@
             <figcaption><b>Bertiga di Hari Guru</b>Tiga orang, satu frame, dan rasa terima kasih yang sama besarnya.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot big" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Dua Jempol">
               <img src="images/foto-46.jpg" alt="Dua siswa dan guru berpose dengan dua jempol" />
             </button>
@@ -1320,14 +1468,14 @@
             <figcaption><b>Senyum di Depan Papan</b>Di depan papan tulis yang sama, hari ini kita yang menulis terima kasih.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot wide" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Guru di Tengah">
               <img src="images/foto-48.jpg" alt="Guru diapit dua siswa dengan buket cokelat" />
             </button>
             <figcaption><b>Guru di Tengah</b>Beliau selalu di tengah — di kelas, di kenangan, dan di doa kita.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot tall" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Sehabis Pelajaran">
               <img src="images/foto-49.jpg" alt="Siswa dan guru berfoto berdua dengan buket cokelat" />
             </button>
@@ -1355,14 +1503,14 @@
             <figcaption><b>Peace di Kelas</b>Di kelas tempat kita belajar, hari ini kita belajar berterima kasih.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot big" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Jempol untuk Guru">
               <img src="images/foto-53.jpg" alt="Siswa mengacungkan jempol bersama guru dengan buket cokelat" />
             </button>
             <figcaption><b>Jempol untuk Guru</b>Satu jempol untuk semua pagi yang beliau mulai dengan sabar.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot tall" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Dua Jari, Satu Hormat">
               <img src="images/foto-54.jpg" alt="Siswa berpose peace dengan guru yang memegang buket cokelat" />
             </button>
@@ -1397,14 +1545,14 @@
             <figcaption><b>Guru Diangkat</b>Hari ini giliran kita yang mengangkat beliau — selama ini beliau yang mengangkat kita.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot tall" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Foto Kelas Hari Guru">
               <img src="images/foto-59.jpg" alt="Seluruh kelas berpose bersama guru di Hari Guru" />
             </button>
             <figcaption><b>Foto Kelas Hari Guru</b>Pose boleh acak-acakan, yang penting semua ada di dalamnya.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot big" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Senyum Bareng Guru">
               <img src="images/foto-60.jpg" alt="Siswa dan guru tersenyum dengan buket cokelat" />
             </button>
@@ -1432,7 +1580,7 @@
             <figcaption><b>Tiga Serangkai</b>Tiga serangkai di hari guru — satu guru, dua murid, sejuta kenangan.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot tall" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Dua Baris, Satu Keluarga">
               <img src="images/foto-64.jpg" alt="Seluruh kelas berpose dua baris dengan guru di tengah" />
             </button>
@@ -1453,7 +1601,7 @@
             <figcaption><b>Peace Bareng Pak Guru</b>Peace hari ini, kenangan selamanya.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot big" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Kelas XII-1 Lengkap">
               <img src="images/foto-67.jpg" alt="Seluruh kelas XII-1 ORNIVALIS berfoto formal bersama guru" />
             </button>
@@ -1467,14 +1615,14 @@
             <figcaption><b>Panorama Kelas</b>Lebar fotonya saja hampir nggak muat — sama seperti kenangan kita yang nggak muat dihitung.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot tall" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Barisan Terakhir">
               <img src="images/foto-69.jpg" alt="Seluruh kelas berfoto formal dua baris bersama guru" />
             </button>
             <figcaption><b>Barisan Terakhir</b>Berdiri tegak semuanya — seperti guru yang selalu berdiri tegak buat kita.</figcaption>
           </figure>
 
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot wide" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Paling Tinggi, Paling Hormat">
               <img src="images/foto-70.jpg" alt="Guru berfoto dengan siswa berjas dan berdasi yang memegang buket" />
             </button>
@@ -1498,7 +1646,7 @@
             </button>
             <figcaption><b>Pamer Perut</b>Jersey diangkat, perut dipamerin — momen paling kocak hari itu.</figcaption>
           </figure>
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot big" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Stop Dulu">
               <img src="images/foto-74.jpg" alt="Siswa mengangkat tangan ke arah kamera" />
             </button>
@@ -1528,7 +1676,7 @@
             </button>
             <figcaption><b>Cermin Kelas</b>Selfie di cermin kelas, pose rock and roll semua.</figcaption>
           </figure>
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot tall" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Muka Ujian">
               <img src="images/foto-79.jpg" alt="Siswa berseragam putih berdiri dengan wajah lelah di ruang kelas" />
             </button>
@@ -1540,7 +1688,7 @@
             </button>
             <figcaption><b>Dari Atas Partisi</b>Satu kelas nyempil di balik partisi — semua kebagian frame.</figcaption>
           </figure>
-          <figure class="shot" data-cat="kelas">
+          <figure class="shot big" data-cat="kelas">
             <button class="thumb" type="button" aria-label="Perbesar foto: Sang Fotografer">
               <img src="images/foto-81.jpg" alt="Siswa memegang kamera kecil selfie di cermin" />
             </button>
@@ -1739,6 +1887,14 @@
       (function () {
         "use strict";
 
+        /* Seret (drag) pakai Pointer Events bila tersedia, kalau tidak pakai mouse. */
+        var HAS_POINTER = typeof window.PointerEvent !== "undefined";
+        var EV_DOWN = HAS_POINTER ? "pointerdown" : "mousedown";
+        var EV_MOVE = HAS_POINTER ? "pointermove" : "mousemove";
+        var EV_UP = HAS_POINTER ? "pointerup" : "mouseup";
+        /* Hujan emas: diisi oleh kode debu emas di bawah; dipanggil saat intro selesai. */
+        var startRain = null;
+
         /* ---------- Layar pembuka + kilau + teks mengetik ---------- */
         var reduceMotionIntro = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         var introEl = document.getElementById("intro");
@@ -1769,6 +1925,8 @@
           if (introDone) return;
           introDone = true;
           document.body.classList.add("intro-done");
+          /* Hero sudah terlihat: hujani emas sebentar. */
+          if (typeof startRain === "function") startRain();
           if (introEl) {
             introEl.classList.add("out");
             setTimeout(function () { if (introEl.parentNode) introEl.remove(); }, 550);
@@ -1807,6 +1965,46 @@
             emptyMsg.hidden = any;
           });
         });
+
+        /* ---------- Panorama 360 drag ---------- */
+        var pano = document.getElementById("pano");
+        var panoTrack = document.getElementById("panoTrack");
+        if (pano && panoTrack) {
+          var panoX = 0;
+          var panoDrag = null;
+          function panoClampX(x) {
+            var min = -(panoTrack.clientWidth - pano.clientWidth);
+            if (min > 0) min = 0;
+            return Math.max(min, Math.min(0, x));
+          }
+          function panoApply() { panoTrack.style.transform = "translateX(" + panoX + "px)"; }
+          function panoMoveBy(dx) { panoX = panoClampX(panoX + dx); panoApply(); }
+          pano.addEventListener(EV_DOWN, function (e) {
+            if (e.target && e.target.closest && e.target.closest(".pano-btn")) return;
+            if (e.button !== undefined && e.button !== 0) return;
+            panoDrag = { startX: e.clientX, startPanoX: panoX };
+            pano.classList.add("dragging");
+            if (e.preventDefault) e.preventDefault();
+          });
+          window.addEventListener(EV_MOVE, function (e) {
+            if (!panoDrag) return;
+            panoX = panoClampX(panoDrag.startPanoX + (e.clientX - panoDrag.startX));
+            panoApply();
+          });
+          window.addEventListener(EV_UP, function () {
+            if (!panoDrag) return;
+            panoDrag = null;
+            pano.classList.remove("dragging");
+          });
+          var panoPrevBtn = document.getElementById("panoPrev");
+          var panoNextBtn = document.getElementById("panoNext");
+          if (panoPrevBtn) panoPrevBtn.addEventListener("click", function () { panoMoveBy(pano.clientWidth * 0.5); });
+          if (panoNextBtn) panoNextBtn.addEventListener("click", function () { panoMoveBy(-pano.clientWidth * 0.5); });
+          pano.addEventListener("keydown", function (e) {
+            if (e.key === "ArrowLeft") { e.preventDefault(); panoMoveBy(pano.clientWidth * 0.5); }
+            else if (e.key === "ArrowRight") { e.preventDefault(); panoMoveBy(-pano.clientWidth * 0.5); }
+          });
+        }
 
         /* ---------- Lightbox ---------- */
         var lb = document.getElementById("lightbox");
@@ -2095,6 +2293,58 @@
               });
             }
           }
+          /* Hujan emas: ledakan ~120 partikel jatuh saat hero pertama tampil
+             (setelah layar pembuka ditutup). Berhenti sendiri ~5 detik kemudian;
+             setelah itu kanvas kembali ke debu ambient biasa, tanpa biaya rAF
+             tambahan — hujan menumpang loop yang sama. */
+          var rainDrops = [];
+          var rainActive = false;
+          var rainEndAt = 0;
+          startRain = function () {
+            var w = dustCanvas.parentNode.clientWidth;
+            var h = dustCanvas.parentNode.clientHeight;
+            rainDrops = [];
+            for (var i = 0; i < 120; i++) {
+              rainDrops.push({
+                x: Math.random() * w,
+                y: -20 - Math.random() * h * 0.5,
+                r: 1 + Math.random() * 2.2,
+                vy: 3 + Math.random() * 4,
+                sway: 0.4 + Math.random() * 0.9,
+                phase: Math.random() * Math.PI * 2,
+                life: 0.55 + Math.random() * 0.45
+              });
+            }
+            rainActive = true;
+            rainEndAt = Date.now() + 5000;
+            dustCanvas._goldRainActive = true;
+            dustCanvas._goldRainCount = rainDrops.length;
+            startDust();
+          };
+          function drawRain(h) {
+            if (!rainActive) return;
+            var now = Date.now();
+            var remain = [];
+            for (var j = 0; j < rainDrops.length; j++) {
+              var d = rainDrops[j];
+              d.y += d.vy;
+              d.phase += 0.02;
+              var fade = now >= rainEndAt ? Math.max(0, 1 - (now - rainEndAt) / 600) : 1;
+              if (d.y > h + 8 || fade <= 0) continue;
+              var dx = d.x + Math.sin(d.phase) * d.sway * 6;
+              dctx.beginPath();
+              dctx.arc(dx, d.y, d.r, 0, Math.PI * 2);
+              dctx.fillStyle = "rgba(231, 189, 98, " + (d.life * fade).toFixed(2) + ")";
+              dctx.fill();
+              remain.push(d);
+            }
+            rainDrops = remain;
+            dustCanvas._goldRainCount = rainDrops.length;
+            if (!rainDrops.length || now >= rainEndAt + 600) {
+              rainActive = false;
+              dustCanvas._goldRainActive = false;
+            }
+          }
           function drawDust(t) {
             if (!dustRunning) return;
             var w = dustCanvas.parentNode.clientWidth;
@@ -2112,6 +2362,7 @@
               dctx.fillStyle = "rgba(231, 189, 98, " + a.toFixed(2) + ")";
               dctx.fill();
             }
+            drawRain(h);
             requestAnimationFrame(drawDust);
           }
           function startDust() {
@@ -2181,32 +2432,9 @@
           });
         }
 
-        /* ---------- Bubble pesan melayang mengikuti scroll ---------- */
-        var wallEl = document.getElementById("wall");
-        var driftTicking = false;
-        var driftEnabled = !!(wallEl && !reduceMotion);
-        function driftBubbles() {
-          driftTicking = false;
-          if (!driftEnabled || !wallEl) return;
-          var cards = wallEl.querySelectorAll(".msg-card");
-          var vh = window.innerHeight || 600;
-          for (var i = 0; i < cards.length; i++) {
-            var el = cards[i];
-            var r = el.getBoundingClientRect();
-            if (r.bottom < -80 || r.top > vh + 80) { el.style.translate = ""; continue; }
-            var center = (r.top + r.height / 2 - vh / 2) / vh;
-            var dir = (i % 2 === 0) ? 1 : -1;
-            el.style.translate = "0px " + (center * 28 * dir).toFixed(1) + "px";
-          }
-        }
-        function requestDrift() {
-          if (!driftTicking) { driftTicking = true; requestAnimationFrame(driftBubbles); }
-        }
-        if (driftEnabled) {
-          window.addEventListener("scroll", requestDrift, { passive: true });
-          window.addEventListener("resize", requestDrift);
-          requestDrift();
-        }
+        /* Dulu ada drift bubble mengikuti scroll di sini — dihapus: dinding
+           sekarang jadi sticky notes yang bisa di-drag, dan drift akan
+           berlawanan dengan posisi seretan pengguna. */
 
         /* ---------- Pengunjung + buku pesan (Worker ORNIVALIS) ---------- */
         var API = "https://ornivalis-stats.muchammadleonardtaufikputra.workers.dev";
@@ -2265,10 +2493,37 @@
             if (!list.length) return;
             if (wallEmpty) wallEmpty.remove();
             list.forEach(function (m) { wall.appendChild(msgCard(m)); });
-            requestDrift();
           }).catch(function () {});
         }
         loadMessages();
+
+        /* ---------- Dinding sticky notes: catatan bisa di-drag ---------- */
+        /* Posisi seretan disimpan di --dx/--dy tiap kartu; tetap di sana setelah dilepas. */
+        var noteDrag = null;
+        if (wall) {
+          wall.addEventListener(EV_DOWN, function (e) {
+            var card = e.target && e.target.closest ? e.target.closest(".msg-card") : null;
+            if (!card) return;
+            if (e.button !== undefined && e.button !== 0) return;
+            var dx0 = parseFloat(card.style.getPropertyValue("--dx")) || 0;
+            var dy0 = parseFloat(card.style.getPropertyValue("--dy")) || 0;
+            noteDrag = { card: card, startX: e.clientX, startY: e.clientY, dx0: dx0, dy0: dy0 };
+            card.classList.add("dragging");
+            if (e.preventDefault) e.preventDefault();
+          });
+          window.addEventListener(EV_MOVE, function (e) {
+            if (!noteDrag) return;
+            var dx = noteDrag.dx0 + (e.clientX - noteDrag.startX);
+            var dy = noteDrag.dy0 + (e.clientY - noteDrag.startY);
+            noteDrag.card.style.setProperty("--dx", dx + "px");
+            noteDrag.card.style.setProperty("--dy", dy + "px");
+          });
+          window.addEventListener(EV_UP, function () {
+            if (!noteDrag) return;
+            noteDrag.card.classList.remove("dragging");
+            noteDrag = null;
+          });
+        }
 
         var form = document.getElementById("msgForm");
         var nameInput = document.getElementById("msgName");
@@ -2308,7 +2563,6 @@
             if (!res.ok) throw new Error((res.d && res.d.error) || "Gagal mengirim pesan.");
             if (wallEmpty) wallEmpty.remove();
             wall.insertBefore(msgCard({ name: name, message: text, t: Date.now() }), wall.firstChild);
-            requestDrift();
             form.reset();
             charCount.textContent = "0/500";
             formNote.textContent = "Pesanmu sudah terkirim. Terima kasih sudah meninggalkan jejak di ORNIVALIS!";
