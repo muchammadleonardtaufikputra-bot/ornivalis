@@ -194,7 +194,7 @@ async function handleDeleteMessage(req, env) {
 
 async function handleStats(req, env) {
   const url = new URL(req.url);
-  const key = url.searchParams.get("key") || "";
+  const key = req.headers.get("X-Admin-Key") || url.searchParams.get("key") || "";
   if (!env.ORNIVALIS_STATS_PASSWORD || key !== env.ORNIVALIS_STATS_PASSWORD) {
     return json({ error: "unauthorized" }, 401);
   }
