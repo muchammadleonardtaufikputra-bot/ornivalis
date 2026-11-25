@@ -1026,6 +1026,13 @@
       .song-card figcaption b { display: block; font-size: 1.05rem; margin-bottom: 6px; }
       .song-lyric { display: block; font-family: "Playfair Display", Georgia, serif; font-style: italic; font-size: 1.05rem; color: #8a5d10; margin-bottom: 14px; }
       .song-link { margin-top: 2px; }
+      /* Pemilih lagu: dua tombol pilihan di atas player. */
+      .song-picker { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 0 auto 22px; }
+      .song-choice { font: inherit; cursor: pointer; padding: 10px 20px; border-radius: 999px; border: 1px solid var(--gold); background: transparent; color: inherit; font-weight: 700; line-height: 1.35; transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease; }
+      .song-choice span { display: block; font-size: 0.8rem; font-weight: 400; opacity: 0.75; }
+      .song-choice:hover { transform: translateY(-2px); }
+      .song-choice[aria-pressed="true"] { background: var(--gold); color: #201503; }
+      .song-choice[aria-pressed="true"] span { opacity: 0.85; }
       .video-card figcaption b { color: var(--ink); display: block; font-size: 0.95rem; margin-bottom: 2px; }
       @media (max-width: 650px) { .video-grid { grid-template-columns: 1fr; } }
 
@@ -1783,17 +1790,21 @@
       <section id="lagu">
         <div class="sec-head reveal">
           <h2>Lagu Kelas</h2>
-          <p>Satu lagu buat nemenin semua kenangan di atas.</p>
+          <p>Pilih lagunya, putar, dan biarin kenangan yang bicara.</p>
           <div class="rule"></div>
+        </div>
+        <div class="song-picker reveal" role="group" aria-label="Pilih lagu">
+          <button class="song-choice" type="button" data-song="0" aria-pressed="true">Ramai Sepi Bersama<span>Hindia</span></button>
+          <button class="song-choice" type="button" data-song="1" aria-pressed="false">The One That Got Away<span>Katy Perry</span></button>
         </div>
         <figure class="song-card reveal">
           <div class="song-frame">
-            <iframe src="https://www.youtube.com/embed/tVj5jUW4LvI" title="Hindia &mdash; Ramai Sepi Bersama (Official Lyric Video)" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            <iframe id="songFrame" src="https://www.youtube.com/embed/tVj5jUW4LvI" title="Hindia &mdash; Ramai Sepi Bersama (Official Lyric Video)" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
           </div>
           <figcaption>
-            <b>Ramai Sepi Bersama &mdash; Hindia</b>
-            <span class="song-lyric">&ldquo;Ramai sepi ini milik bersama. Kita sama-sama takkan ke mana &mdash; selama kau ada, aku tak apa.&rdquo;</span>
-            <a class="btn btn-gold song-link" href="https://www.youtube.com/watch?v=tVj5jUW4LvI" target="_blank" rel="noopener">Dengarkan di YouTube</a>
+            <b id="songTitle">Ramai Sepi Bersama &mdash; Hindia</b>
+            <span class="song-lyric" id="songLyric">&ldquo;Ramai sepi ini milik bersama. Kita sama-sama takkan ke mana &mdash; selama kau ada, aku tak apa.&rdquo;</span>
+            <a class="btn btn-gold song-link" id="songLink" href="https://www.youtube.com/watch?v=tVj5jUW4LvI" target="_blank" rel="noopener">Dengarkan di YouTube</a>
           </figcaption>
         </figure>
       </section>
@@ -2608,6 +2619,29 @@
             sendBtn.disabled = false;
             sendBtn.textContent = "Kirim Pesan ✦";
           });
+        });
+        /* ---------- Lagu: pemilih ---------- */
+        var songData = [
+          { title: "Ramai Sepi Bersama \u2014 Hindia", lyric: "\u201CRamai sepi ini milik bersama. Kita sama-sama takkan ke mana \u2014 selama kau ada, aku tak apa.\u201D", video: "tVj5jUW4LvI", frameTitle: "Hindia \u2014 Ramai Sepi Bersama (Official Lyric Video)", yt: "https://www.youtube.com/watch?v=tVj5jUW4LvI" },
+          { title: "The One That Got Away \u2014 Katy Perry", lyric: "\u201CIn another life, I would be your girl. We'd keep all our promises, be us against the world.\u201D", video: "Ahha3Cqe_fk", frameTitle: "Katy Perry \u2014 The One That Got Away (Official Music Video)", yt: "https://www.youtube.com/watch?v=Ahha3Cqe_fk" }
+        ];
+        var songChoices = Array.prototype.slice.call(document.querySelectorAll(".song-choice"));
+        var songFrame = document.getElementById("songFrame");
+        var songTitle = document.getElementById("songTitle");
+        var songLyric = document.getElementById("songLyric");
+        var songLink = document.getElementById("songLink");
+        function pickSong(i) {
+          var s = songData[i];
+          if (!s || !songFrame) return;
+          songChoices.forEach(function (c, j) { c.setAttribute("aria-pressed", j === i ? "true" : "false"); });
+          songFrame.src = "https://www.youtube.com/embed/" + s.video;
+          songFrame.title = s.frameTitle;
+          if (songTitle) songTitle.textContent = s.title;
+          if (songLyric) songLyric.textContent = s.lyric;
+          if (songLink) songLink.href = s.yt;
+        }
+        songChoices.forEach(function (c, i) {
+          c.addEventListener("click", function () { pickSong(i); });
         });
       })();
     </script>
