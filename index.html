@@ -661,6 +661,73 @@
         .lightbox img { max-height: 66vh; }
       }
 
+      /* ---------- SLIDESHOW ---------- */
+      .slideshow {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        background: #0a1322;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+      }
+      .slideshow.open { display: flex; }
+      .slideshow figure { margin: 0; max-width: 1000px; width: 100%; text-align: center; }
+      .slideshow img {
+        max-width: 100%;
+        max-height: 76vh;
+        width: auto;
+        margin: 0 auto;
+        border-radius: 10px;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6);
+      }
+      .slideshow figcaption {
+        color: #e9e2cd;
+        margin-top: 16px;
+        font-size: 1rem;
+        max-width: 640px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .slideshow figcaption b { display: block; font-size: 1.05rem; color: #fff; }
+      .ss-count { color: #9fb0c7; font-size: 0.9rem; margin-top: 8px; }
+      .ss-bar {
+        width: min(420px, 80%);
+        height: 3px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 999px;
+        margin: 14px auto 0;
+        overflow: hidden;
+      }
+      .ss-bar i { display: block; height: 100%; width: 0; background: #d9ab4e; border-radius: 999px; transition: width 0.3s ease; }
+      .ss-open { min-height: 44px; padding: 8px 20px; font-size: 0.95rem; }
+      .ss-btn {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        color: #fff;
+        border-radius: 999px;
+        width: 48px; height: 48px;
+        min-height: 48px;
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+      }
+      .ss-btn:hover { background: rgba(217, 171, 78, 0.85); color: #201503; }
+      .ss-close { top: 16px; right: 16px; }
+      .ss-play { top: 16px; right: 76px; }
+      .ss-prev { left: 14px; top: 50%; transform: translateY(-50%); }
+      .ss-next { right: 14px; top: 50%; transform: translateY(-50%); }
+      @media (max-width: 600px) {
+        .ss-prev { left: 8px; }
+        .ss-next { right: 8px; }
+        .slideshow img { max-height: 66vh; }
+      }
+
       /* ---------- REVEAL ---------- */
       .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
       .reveal.in { opacity: 1; transform: none; }
@@ -916,6 +983,7 @@
           <button class="chip" type="button" data-filter="semua" aria-pressed="true">Semua</button>
           <button class="chip" type="button" data-filter="tour" aria-pressed="false">Study Tour</button>
           <button class="chip" type="button" data-filter="kelas" aria-pressed="false">Di Kelas IC</button>
+          <button class="btn btn-gold ss-open" type="button" id="ssOpenBtn" aria-label="Putar slideshow foto layar penuh">▶ Putar Slideshow</button>
         </div>
 
         <div class="gallery" id="gallery">
@@ -1609,6 +1677,20 @@
       </figure>
     </div>
 
+    <!-- ================= SLIDESHOW ================= -->
+    <div class="slideshow" id="slideshow" role="dialog" aria-modal="true" aria-label="Slideshow foto kenangan">
+      <button class="ss-btn ss-close" id="ssClose" type="button" aria-label="Tutup slideshow">&times;</button>
+      <button class="ss-btn ss-play" id="ssPlay" type="button" aria-label="Jeda">⏸</button>
+      <button class="ss-btn ss-prev" id="ssPrev" type="button" aria-label="Foto sebelumnya">&#8249;</button>
+      <button class="ss-btn ss-next" id="ssNext" type="button" aria-label="Foto berikutnya">&#8250;</button>
+      <figure>
+        <img id="ssImg" src="images/foto-23.jpg" alt="" />
+        <figcaption id="ssCap"></figcaption>
+        <div class="ss-count" id="ssCount"></div>
+        <div class="ss-bar" aria-hidden="true"><i id="ssBarFill"></i></div>
+      </figure>
+    </div>
+
     <script>
       (function () {
         "use strict";
@@ -1755,6 +1837,116 @@
           var dx = e.changedTouches[0].clientX - touchX;
           if (Math.abs(dx) > 48) show(dx < 0 ? current + 1 : current - 1);
           touchX = null;
+        }, { passive: true });
+
+        /* ---------- Slideshow layar penuh ---------- */
+        var ss = document.getElementById("slideshow");
+        var ssImg = document.getElementById("ssImg");
+        var ssCap = document.getElementById("ssCap");
+        var ssCount = document.getElementById("ssCount");
+        var ssBarFill = document.getElementById("ssBarFill");
+        var ssPlayBtn = document.getElementById("ssPlay");
+        var ssSlides = [];
+        var ssCurrent = 0;
+        var ssTimer = null;
+        var ssPlaying = false;
+        var ssLastFocus = null;
+        var reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        function ssUpdate() {
+          if (!ssSlides.length) return;
+          var fig = ssSlides[ssCurrent];
+          var img = fig.querySelector("img");
+          ssImg.src = img.getAttribute("src");
+          ssImg.alt = img.getAttribute("alt") || "";
+          if (!reducedMotion && ssImg.animate) {
+            ssImg.animate([
+              { opacity: 0, transform: "scale(0.97)" },
+              { opacity: 1, transform: "scale(1)" }
+            ], { duration: 260, easing: "ease-out" });
+          }
+          ssCap.innerHTML = captionHTML(fig);
+          ssCount.textContent = "Foto " + (ssCurrent + 1) + " dari " + ssSlides.length;
+          ssBarFill.style.width = ((ssCurrent + 1) / ssSlides.length * 100) + "%";
+          var nextFig = ssSlides[(ssCurrent + 1) % ssSlides.length];
+          var pre = new Image();
+          pre.src = nextFig.querySelector("img").getAttribute("src");
+        }
+
+        function ssGo(index) {
+          if (!ssSlides.length) return;
+          ssCurrent = (index + ssSlides.length) % ssSlides.length;
+          ssUpdate();
+          if (ssPlaying) ssStartTimer();
+        }
+
+        function ssStartTimer() {
+          ssStopTimer();
+          if (reducedMotion) return;
+          ssTimer = setInterval(function () { ssGo(ssCurrent + 1); }, 4000);
+        }
+
+        function ssStopTimer() {
+          if (ssTimer !== null) { clearInterval(ssTimer); ssTimer = null; }
+        }
+
+        function ssSetPlaying(playing) {
+          ssPlaying = playing && !reducedMotion;
+          ssPlayBtn.textContent = ssPlaying ? "⏸" : "▶";
+          ssPlayBtn.setAttribute("aria-label", ssPlaying ? "Jeda" : "Putar");
+          if (ssPlaying) ssStartTimer(); else ssStopTimer();
+        }
+
+        function openSlideshow() {
+          ssSlides = visibleShots();
+          if (!ssSlides.length) return;
+          ssLastFocus = document.activeElement;
+          ssCurrent = 0;
+          ss.classList.add("open");
+          document.body.style.overflow = "hidden";
+          ssUpdate();
+          ssSetPlaying(true);
+          try {
+            if (ss.requestFullscreen) ss.requestFullscreen();
+          } catch (err) {}
+          document.getElementById("ssClose").focus();
+        }
+
+        function closeSlideshow() {
+          ssStopTimer();
+          ssPlaying = false;
+          ss.classList.remove("open");
+          document.body.style.overflow = "";
+          if (document.fullscreenElement && document.exitFullscreen) {
+            try { document.exitFullscreen(); } catch (err) {}
+          }
+          if (ssLastFocus && ssLastFocus.focus) ssLastFocus.focus();
+        }
+
+        document.getElementById("ssOpenBtn").addEventListener("click", openSlideshow);
+        document.getElementById("ssClose").addEventListener("click", closeSlideshow);
+        document.getElementById("ssPrev").addEventListener("click", function () { ssGo(ssCurrent - 1); });
+        document.getElementById("ssNext").addEventListener("click", function () { ssGo(ssCurrent + 1); });
+        ssPlayBtn.addEventListener("click", function () { ssSetPlaying(!ssPlaying); });
+        ss.addEventListener("click", function (e) { if (e.target === ss) closeSlideshow(); });
+
+        document.addEventListener("keydown", function (e) {
+          if (!ss.classList.contains("open")) return;
+          if (e.key === "Escape") closeSlideshow();
+          else if (e.key === "ArrowLeft") ssGo(ssCurrent - 1);
+          else if (e.key === "ArrowRight") ssGo(ssCurrent + 1);
+          else if (e.key === " ") { e.preventDefault(); ssSetPlaying(!ssPlaying); }
+        });
+
+        var ssTouchX = null;
+        ss.addEventListener("touchstart", function (e) {
+          ssTouchX = e.changedTouches[0].clientX;
+        }, { passive: true });
+        ss.addEventListener("touchend", function (e) {
+          if (ssTouchX === null) return;
+          var dx = e.changedTouches[0].clientX - ssTouchX;
+          if (Math.abs(dx) > 48) ssGo(dx < 0 ? ssCurrent + 1 : ssCurrent - 1);
+          ssTouchX = null;
         }, { passive: true });
 
         /* ---------- Galeri: foto muncul bergiliran saat masuk layar ---------- */
