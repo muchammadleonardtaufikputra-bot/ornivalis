@@ -1,0 +1,20 @@
+{
+  "name": "ORNIVALIS — Kenangan XII-1",
+  "short_name": "ORNIVALIS",
+  "description": "Ruang digital untuk menyimpan cerita, foto, video, dan kenangan Kelas XII-1",
+  "lang": "id",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0e1c30",
+  "theme_color": "#0e1c30",
+  "icons": [
+    {
+      "src": "images/logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
