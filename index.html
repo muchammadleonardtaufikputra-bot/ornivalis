@@ -839,6 +839,52 @@
       }
     </style>
     <noscript><style>#intro { display: none; }</style></noscript>
+  <link rel="manifest" href="./manifest.json" /><meta name="theme-color" content="#0e1c30" />
+    <style id="ornivalis-2-enhancements">
+      :root { --o2-glass: rgba(14,28,48,.88); --o2-line: rgba(201,151,63,.28); }
+      html { scroll-padding-top: 88px; }
+      body { background-image: radial-gradient(ellipse at 50% -15%, rgba(201,151,63,.09), transparent 52%); }
+      .o2-progress { position:fixed; inset:0 0 auto; height:3px; z-index:1200; pointer-events:none; background:transparent; }
+      .o2-progress span { display:block; width:0; height:100%; background:linear-gradient(90deg,#b9822d,#f2d28a,#b9822d); box-shadow:0 0 12px rgba(217,171,78,.7); }
+      .o2-nav { position:sticky; top:0; z-index:110; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:10px max(18px,calc((100vw - 1120px)/2)); background:var(--o2-glass); border-bottom:1px solid var(--o2-line); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); color:#f8f1e3; }
+      .o2-brand { color:#f4d28b; text-decoration:none; font-family:"Playfair Display",Georgia,serif; font-weight:800; letter-spacing:.14em; white-space:nowrap; }
+      .o2-links { display:flex; align-items:center; justify-content:center; gap:clamp(8px,2vw,22px); flex-wrap:wrap; }
+      .o2-links a { color:#f5efdf; text-decoration:none; font-size:.82rem; font-weight:700; opacity:.82; }
+      .o2-links a:hover,.o2-links a[aria-current="location"] { color:#f2cb78; opacity:1; }
+      .o2-tools { display:flex; gap:8px; }
+      .o2-tool { border:1px solid rgba(242,210,138,.4); color:#f5dfae; background:transparent; border-radius:999px; padding:7px 12px; min-height:38px; font-size:.82rem; font-weight:700; }
+      .o2-tool:hover { background:rgba(242,210,138,.12); }
+      .o2-gallery-tools { display:flex; justify-content:center; align-items:center; gap:12px; flex-wrap:wrap; margin:0 auto 20px; max-width:680px; }
+      .o2-search { width:min(100%,360px); min-height:46px; border:1px solid var(--line); border-radius:999px; padding:10px 18px; color:var(--ink); background:var(--surface); font:inherit; }
+      .o2-result { color:var(--ink-soft); font-size:.88rem; font-weight:700; }
+      .o2-top { position:fixed; right:18px; bottom:18px; z-index:100; width:48px; height:48px; border:1px solid var(--o2-line); border-radius:50%; background:var(--navy); color:#f3d99e; box-shadow:var(--shadow); opacity:0; transform:translateY(12px); pointer-events:none; transition:.2s ease; }
+      .o2-top.visible { opacity:1; transform:none; pointer-events:auto; }
+      .o2-top:focus-visible { outline:3px solid var(--gold); outline-offset:3px; }
+      body[data-theme="light"] { color-scheme:light; --bg:#f6f2ea; --bg-soft:#efe8da; --surface:#fffdf8; --ink:#1c2434; --ink-soft:#4c5568; --line:#ddd2bd; --gold:#c9973f; --gold-strong:#a97a24; --gold-soft:#f0dfba; --accent-ink:#8a5d10; --shadow:0 18px 40px rgba(28,36,52,.13); }
+      body[data-theme="dark"] { color-scheme:dark; --bg:#0a1322; --bg-soft:#0e1c30; --surface:#12233c; --ink:#f0ead9; --ink-soft:#b9c2d4; --line:#2a3c58; --gold:#d9ab4e; --gold-strong:#e7bd62; --gold-soft:#2c2413; --accent-ink:#e7bd62; --shadow:0 18px 40px rgba(0,0,0,.45); }
+      body[data-theme="dark"] .form-card input,body[data-theme="dark"] .form-card textarea,body[data-theme="dark"] .o2-search { background:#0e1c30; color:#f0ead9; }
+      body[data-theme="dark"] .o2-nav { background:rgba(7,15,28,.92); }
+      .shot { transition:transform .28s ease,box-shadow .28s ease; }
+      .shot:hover { transform:translateY(-4px); box-shadow:0 16px 34px rgba(28,36,52,.14); }
+      .quote,.surat,.ingatan,.form-card { backdrop-filter:blur(8px); }
+      .video-card video { width:100%; }
+      @media(max-width:760px) {
+        .o2-nav { padding:9px 14px; flex-wrap:wrap; justify-content:center; gap:8px; }
+        .o2-brand { width:100%; text-align:center; }
+        .o2-links { order:3; width:100%; flex-wrap:nowrap; overflow-x:auto; justify-content:flex-start; padding:4px 2px 7px; scrollbar-width:thin; }
+        .o2-links a { white-space:nowrap; }
+        .o2-tools { position:absolute; right:12px; top:8px; }
+        .hero { padding-top:38px; }
+        section { padding-top:58px; }
+        .o2-top { right:12px; bottom:12px; }
+      }
+      @media(prefers-reduced-motion:reduce) {
+        html { scroll-behavior:auto; }
+        .shot,.o2-top { transition:none; }
+        .shot:hover { transform:none; }
+      }
+    </style>
+
   </head>
   <body>
     <!-- ================= LAYAR PEMBUKA ================= -->
@@ -1787,5 +1833,100 @@
         });
       })();
     </script>
+  
+    <script id="ornivalis-2-controller">
+    (function(){
+      "use strict";
+      var body=document.body;
+      var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var progress=document.createElement("div");
+      progress.className="o2-progress";
+      progress.setAttribute("aria-hidden","true");
+      progress.innerHTML="<span></span>";
+      body.appendChild(progress);
+      var bar=progress.firstElementChild;
+      var top=document.createElement("button");
+      top.className="o2-top"; top.type="button"; top.textContent="↑";
+      top.setAttribute("aria-label","Kembali ke atas"); body.appendChild(top);
+      var nav=document.createElement("nav");
+      nav.className="o2-nav"; nav.setAttribute("aria-label","Navigasi utama");
+      nav.innerHTML='<a class="o2-brand" href="#top">ORNIVALIS</a><div class="o2-links"><a href="#surat">Surat</a><a href="#galeri">Galeri</a><a href="#video">Video</a><a href="#kata">Kata-kata</a><a href="#ingatan">Ingatan</a><a href="#pesan">Pesan</a></div><div class="o2-tools"><button class="o2-tool" type="button" id="o2Theme" aria-label="Ganti tema">◐ Tema</button></div>';
+      var hero=document.querySelector(".hero");
+      if(hero) hero.insertAdjacentElement("afterend",nav);
+      var brand=nav.querySelector(".o2-brand");
+      if(hero) { hero.id="top"; }
+      var themeButton=nav.querySelector("#o2Theme");
+      var savedTheme="";
+      try{savedTheme=localStorage.getItem("ornivalis-theme")||"";}catch(e){}
+      if(savedTheme==="light"||savedTheme==="dark") body.setAttribute("data-theme",savedTheme);
+      function toggleTheme(){
+        var current=body.getAttribute("data-theme")||(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+        var next=current==="dark"?"light":"dark";
+        body.setAttribute("data-theme",next);
+        try{localStorage.setItem("ornivalis-theme",next);}catch(e){}
+      }
+      themeButton.addEventListener("click",toggleTheme);
+      var gallery=document.getElementById("gallery");
+      var shots=gallery?Array.prototype.slice.call(gallery.querySelectorAll(".shot")):[];
+      var filters=Array.prototype.slice.call(document.querySelectorAll(".filters .chip"));
+      var activeFilter="semua";
+      if(gallery&&filters.length){
+        var tools=document.createElement("div"); tools.className="o2-gallery-tools";
+        var search=document.createElement("input"); search.className="o2-search"; search.type="search"; search.placeholder="Cari foto atau kenangan…"; search.setAttribute("aria-label","Cari foto berdasarkan judul atau deskripsi");
+        var count=document.createElement("span"); count.className="o2-result"; count.setAttribute("aria-live","polite");
+        tools.append(search,count); document.querySelector(".filters").insertAdjacentElement("beforebegin",tools);
+        function apply(){
+          var q=search.value.trim().toLocaleLowerCase("id");
+          var shown=0;
+          shots.forEach(function(card){
+            var cat=card.getAttribute("data-cat")||"";
+            var text=(card.textContent+" "+(card.querySelector("img")||{}).alt).toLocaleLowerCase("id");
+            var ok=(activeFilter==="semua"||cat===activeFilter)&&(!q||text.indexOf(q)!==-1);
+            card.hidden=!ok; if(ok) shown++;
+          });
+          count.textContent=shown+" dari "+shots.length+" foto";
+          var empty=document.getElementById("galleryEmpty"); if(empty) empty.hidden=shown!==0;
+        }
+        search.addEventListener("input",apply);
+        filters.forEach(function(chip){chip.addEventListener("click",function(){activeFilter=chip.getAttribute("data-filter")||"semua";apply();});});
+        apply();
+      }
+      top.addEventListener("click",function(){window.scrollTo({top:0,behavior:reduce?"auto":"smooth"});});
+      var ticking=false;
+      function updateScroll(){
+        var max=document.documentElement.scrollHeight-window.innerHeight;
+        var pct=max>0?window.scrollY/max*100:0;
+        bar.style.width=Math.max(0,Math.min(100,pct))+"%";
+        top.classList.toggle("visible",window.scrollY>520);
+        ticking=false;
+      }
+      window.addEventListener("scroll",function(){if(!ticking){window.requestAnimationFrame(updateScroll);ticking=true;}},{passive:true});
+      updateScroll();
+      var sections=Array.prototype.slice.call(document.querySelectorAll("main section[id]"));
+      if("IntersectionObserver" in window){
+        var navObserver=new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if(entry.isIntersecting){
+              nav.querySelectorAll(".o2-links a").forEach(function(a){
+                if(a.getAttribute("href")==="#"+entry.target.id)a.setAttribute("aria-current","location");
+                else a.removeAttribute("aria-current");
+              });
+            }
+          });
+        },{rootMargin:"-25% 0px -65% 0px"});
+        sections.forEach(function(section){navObserver.observe(section);});
+      }
+      var imgs=Array.prototype.slice.call(document.querySelectorAll("main img"));
+      imgs.forEach(function(img){
+        if(!img.hasAttribute("loading")&&!img.closest(".hero-photo")) img.loading="lazy";
+        img.decoding="async";
+      });
+      document.querySelectorAll(".video-grid video").forEach(function(video){video.controls=true;video.setAttribute("preload","metadata");});
+      if("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+        window.addEventListener("load",function(){navigator.serviceWorker.register("./sw.js").catch(function(){});});
+      }
+    })();
+    </script>
+
   </body>
 </html>
